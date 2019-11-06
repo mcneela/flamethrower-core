@@ -1,4 +1,3 @@
-from tracer import trace, GradNode
 from utils import topological_sort
 import inspect
 import operator
@@ -38,3 +37,8 @@ def my_sum(y, x):
     if y is None:
         return x
     return y + x
+
+def trace(start_node, fn, x):
+    start_box = Tensor(x, start_node)
+    end_box = fn(start_box)
+    return end_box._data, end_box._node

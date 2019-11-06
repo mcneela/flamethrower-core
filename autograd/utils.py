@@ -1,3 +1,11 @@
+
+def name(primitive):
+    """
+    Gets the __name__
+    of a `Primitive`.
+    """
+    return primitive.__name__()
+
 def topological_sort(end_node):
     """
     Performs a topological start

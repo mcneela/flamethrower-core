@@ -35,8 +35,10 @@ class GradNode(Node):
 			raise NotImplementedError("Grad of {} wrt argnums {} not defined"
 									  .format(fn_name))
 
+	def is_root(self):
+		return self.parents == []
+
 	def initialize_root(self):
 		self.parents = []
 		self.recipe = (lambda x: x, None, (), {}, [])
 		self.grad_fns = {0: lambda g, ans, x, y: (), 1: lambda g, ans, x, y: ()}
-

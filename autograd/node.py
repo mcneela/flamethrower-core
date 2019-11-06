@@ -1,3 +1,5 @@
+import tensor_library as tl
+from utils import name
 from grad_defs import grad_definitions
 
 class Node(object):
@@ -5,7 +7,7 @@ class Node(object):
 	def __init__(self, val, fn, args, kwargs, argnums, parents):
 		assert False
 
-	def initialize_root(self, *args, **kwargs):
+	def init_root(self, *args, **kwargs):
 		assert False
 
 	@classmethod
@@ -20,9 +22,14 @@ class GradNode(Node):
 		self.parents = parents
 		self.recipe = fn, val, args, kwargs, argnums
 		try:
-			self.grad_fns = grad_definitions[fn.__class__.__name__]
-			
+			self.grad_fns = grad_definitions[name(fn)]
 		except KeyError:
 			fn_name = getattr(fn, '__name__', fn)
 			raise NotImplementedError("Grad of {} wrt argnums {} not defined"
 									  .format(fn_name))
+
+	def init_root(self):
+		self.parents = []
+		self.recipe = (lambda x: x, None, (), {}, [])
+		self.grad_fns = {0: lambda g, ans, x, y: (), 1: lambda g, ans, x, y: ()}
+

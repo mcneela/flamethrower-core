@@ -8,7 +8,6 @@ class Variable(object):
 
 	def __init__(self, data, node):
 		self._data = data
-		# self._trace = trace
 		self._node  = node
 
 	def __bool__(self):
@@ -20,3 +19,4 @@ class Variable(object):
 	def register(cls, value_type):
 		Variable.types.add(cls)
 		Variable.type_mappings[value_type] = cls
+

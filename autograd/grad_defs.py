@@ -6,7 +6,7 @@ grad_definitions = {}
 grad_defs_by_parity = {}
 
 def name(fn):
-	return fn.__name__
+	return fn.__name__()
 
 def define_grad(fn, *grads, **kwargs):
 	for argnum, partial in enumerate(grads):
