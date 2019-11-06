@@ -26,7 +26,7 @@ def backward(x, end_node):
     outgrads = {end_node : x}
     for node in topological_sort(end_node):
         g = outgrads.pop(node)
-        fun, value, args, kwargs, argnums = node.recipe
+        fun, value, args, kwargs, argnums = node.package
         for argnum, parent in zip(argnums, node.parents):
             grad = node.grad_fns[argnum]
             parent_grad = g * grad(value, *args, **kwargs)

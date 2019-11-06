@@ -1,8 +1,8 @@
-from tensor import Tensor
-from variable import Variable
+import tensor as ten
+import variable as var
 
 def isvar(x):
-	return isinstance(x, Variable)
+	return isinstance(x, var.Variable)
 
 def get_data(args, var_args):
 	args = list(args)
@@ -40,7 +40,7 @@ class Primitive(object):
 			argnums = get_argnums(var_args)
 			ans     = self(*argdata, **kwargs)
 			node    = node_type(ans, self, argdata, kwargs, argnums, parents)
-			return  Tensor(ans, node)
+			return  ten.Tensor(ans, node)
 		else:
 			return self.fn(*args, **kwargs)
 

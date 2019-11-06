@@ -1,10 +1,15 @@
 
+def sum_with_none(x, y):
+    if x is None:
+        return y
+    return x + y
+
 def name(primitive):
     """
     Gets the __name__
     of a `Primitive`.
     """
-    return primitive.__name__()
+    return primitive.__name__
 
 def topological_sort(end_node):
     """
