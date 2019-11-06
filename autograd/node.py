@@ -5,15 +5,15 @@ from grad_defs import grad_definitions
 class Node(object):
 	__slots__ = []
 	def __init__(self, val, fn, args, kwargs, argnums, parents):
-		assert False
+		raise NotImplementedError
 
 	def init_root(self, *args, **kwargs):
-		assert False
+		raise NotImplementedError
 
 	@classmethod
 	def new_root(cls, *args, **kwargs):
 		root = cls.__new__(cls)
-		root.initialize_root(*args, **kwargs)
+		root.init_root(*args, **kwargs)
 		return root
 
 class GradNode(Node):
