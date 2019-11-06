@@ -45,12 +45,6 @@ class Tensor(Variable):
 	def __hash__(self): return id(self)
 
 
-def subval(x, i, v):
-	x_ = list(x)
-	x_[i] = v
-	return tuple(x_)
-
-
 tensor_types = [float, np.float16, np.float32, np.float64,
 				complex, np.complex64, np.complex128, np.ndarray]
 for _type in tensor_types:
