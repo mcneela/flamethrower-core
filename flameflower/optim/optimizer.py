@@ -1,4 +1,5 @@
-import autograd as ag
+import flameflower.autograd as ag
+import logging
 
 class Optimizer(object):
 	"""
@@ -50,5 +51,4 @@ class Optimizer(object):
 
 
 	def step(self, closure=None):
-		logging.info("Running optimization step.")
 		raise NotImplementedError

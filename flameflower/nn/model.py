@@ -55,5 +55,3 @@ class Module(object):
 			if param.grad:
 				param.grad.detach_()
 				param.grad.zero_()
-
-	def 

@@ -1,7 +1,6 @@
-import autograd.numpy as np
-import autograd.numpy.random as npr
-from autograd import grad
-from module import Module
+from .module import Module
+import flameflower.autograd.tensor_library as np
+import numpy.random as npr
 
 class Linear(Module):
 	def __init__(self, in_size, out_size, use_bias=True):
