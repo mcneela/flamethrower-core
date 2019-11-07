@@ -35,7 +35,7 @@ class Tensor(Variable):
 	def __truediv__(self, other): return tl.true_divide(self, other)
 	def __rtruediv__(self, other): return tl.true_divide(other, self)
 	def __matmul__(self, other): return tl.matmul(self, other)
-	def __rmatmul__(self, other): return tl.rmatmul(other, self)
+	def __rmatmul__(self, other): return tl.matmul(other, self)
 	def __eq__(self, other): return tl.equal(self, other)
 	def __ne__(self, other): return tl.not_equal(self, other)
 	def __gt__(self, other): return tl.greater(self, other)

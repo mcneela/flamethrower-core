@@ -15,18 +15,18 @@ class SGD(Optimizer):
 	def step(self, closure=None):
 		for group in self.param_groups:
 			for p in group['params']:
-				if p.grad is None:
+				if p.node().grad is None:
 					continue
-				grad = p.grad
+				grad = p.node().grad
 
-				state = self.state[p]
+				# state = self.state[p]
 
-				if len(state) == 0:
-					state['step'] = 0
+				# if len(state) == 0:
+				# 	state['step'] = 0
 
-				lr = group['lr']
-				state['step'] += 1
+				# lr = group['lr']
+				# state['step'] += 1
 
-				p._data -= lr * grad
+				p._data -= self.lr * grad
 
 		return None

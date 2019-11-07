@@ -28,6 +28,19 @@ class Optimizer(object):
 		for pg in param_groups:
 			self.add_param_group(pg)
 
+	def add_param_group(self, param_group):
+		r"""Add a param group to the :class:`Optimizer` s `param_groups`.
+
+		This can be useful when fine tuning a pre-trained network as frozen layers can be made
+		trainable and added to the :class:`Optimizer` as training progresses.
+
+		Arguments:
+			param_group (dict): Specifies what Tensors should be optimized along with group
+			specific optimization options.
+		"""
+
+		self.param_groups.append(param_group)
+
 	def _configure_logging(self, logfile=None):
 		if logfile is None:
 			name = self.__name__

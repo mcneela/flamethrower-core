@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import numpy as np
 import logging
 import pickle
 
@@ -51,12 +52,83 @@ class Module(object):
 		logging.info(f"Creating new buffer with name: {name} and value: {obj}")
 		self._buffers[name] = obj
 
+	def named_modules(self, memo=None, prefix=''):
+		r"""Returns an iterator over all modules in the network, yielding
+		both the name of the module as well as the module itself.
+
+		Yields:
+			(string, Module): Tuple of name and module
+
+		Note:
+			Duplicate modules are returned only once. In the following
+			example, ``l`` will be returned only once.
+
+		Example::
+
+			>>> l = nn.Linear(2, 2)
+			>>> net = nn.Sequential(l, l)
+			>>> for idx, m in enumerate(net.named_modules()):
+					print(idx, '->', m)
+
+			0 -> ('', Sequential(
+			  (0): Linear(in_features=2, out_features=2, bias=True)
+			  (1): Linear(in_features=2, out_features=2, bias=True)
+			))
+			1 -> ('0', Linear(in_features=2, out_features=2, bias=True))
+
+		"""
+
+		if memo is None:
+			memo = set()
+		if self not in memo:
+			memo.add(self)
+			yield prefix, self
+			for name, module in self._modules.items():
+				if module is None:
+					continue
+				submodule_prefix = prefix + ('.' if prefix else '') + name
+				for m in module.named_modules(memo, submodule_prefix):
+					yield m
+		
+	def _named_members(self, get_members_fn, prefix='', recurse=True):
+		r"""Helper method for yielding various names + members of modules."""
+		memo = set()
+		modules = self.named_modules(prefix=prefix) if recurse else [(prefix, self)]
+		for module_prefix, module in modules:
+			members = get_members_fn(module)
+			for k, v in members:
+				if v is None or str(v) in memo:
+					continue
+				memo.add(str(v))
+				name = module_prefix + ('.' if module_prefix else '') + k
+				yield name, v
+
+
+	def named_parameters(self, prefix='', recurse=True):
+		gen = self._named_members(
+			lambda module: module._params.items(),
+			prefix=prefix, recurse=recurse)
+		for elem in gen:
+			yield elem
+
 	def new_param(self, name, param):
 		logging.info(f"Creating new param with name: {name} and value: {param}")
 		self._params[name] = param
 
 	def add_module(self, name, module):
 		logging.info(f"Adding module with name: {name} and value: {module} to internal modules.")
+		self._modules[name] = module
+
+	def add_module(self, name, module):
+		r"""Adds a child module to the current module.
+
+		The module can be accessed as an attribute using the given name.
+
+		Args:
+			name (string): name of the child module. The child module can be
+				accessed from this module using the given name
+			module (Module): child module to be added to the module.
+		"""
 		self._modules[name] = module
 
 	def _forward(self, *args, **kwargs):
@@ -73,7 +145,7 @@ class Module(object):
 		"""
 		Returns an iterator over module named parameters
 		"""
-		for name, param in self._params:
+		for name, param in self.named_parameters():
 			yield param
 
 	def children(self):
@@ -108,5 +180,4 @@ class Module(object):
 		"""
 		for param in self.params():
 			if param.grad:
-				param.grad.detach_()
-				param.grad.zero_()
+				param.grad = np.zeros_like(param.grad)

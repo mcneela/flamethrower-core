@@ -65,7 +65,7 @@ def grad_transpose(ans, g, x, axes=None):
 define_grad(np.transpose, grad_transpose)
 
 def unbroadcast(x, target_meta, broadcast_idx=0):
-	target_shape, target_ndim, dtype, target_iscomplex = target_meta
+	target_shape, target_ndim, target_iscomplex = target_meta
 	while np.ndim(x) > target_ndim:
 		x = np.sum(x, axis=broadcast_idx)
 	for axis, size in enumerate(target_shape):
@@ -78,7 +78,7 @@ def unbroadcast(x, target_meta, broadcast_idx=0):
 def matmul_adjoint_0(B, G, A_meta, B_ndim):
 	if np.ndim(G) == 0:  # A_ndim == B_ndim == 1
 		return unbroadcast(G * B, A_meta)
-	_, A_ndim, _, _ = A_meta
+	_, A_ndim, _ = A_meta
 	if A_ndim == 1:
 		G = np.expand_dims(G, np.ndim(G) - 1)
 	if B_ndim == 1:  # The result we need is an outer product
@@ -92,7 +92,7 @@ def matmul_adjoint_0(B, G, A_meta, B_ndim):
 def matmul_adjoint_1(A, G, A_ndim, B_meta):
 	if np.ndim(G) == 0:  # A_ndim == B_ndim == 1
 		return unbroadcast(G * A, B_meta)
-	_, B_ndim, _, _ = B_meta
+	_, B_ndim, _ = B_meta
 	B_is_vec = (B_ndim == 1)
 	if B_is_vec:
 		G = np.expand_dims(G, np.ndim(G))
@@ -117,6 +117,6 @@ def matmul_vjp_1(ans, g, A, B):
 	return matmul_adjoint_1(A, g, A_ndim, B_meta)
 
 def metadata(A):
-	return np.shape(A), np.ndim(A), np.result_type(A), np.iscomplexobj(A)
+	return np.shape(A), np.ndim(A), np.iscomplexobj(A)
 
 define_grad(np.matmul, matmul_vjp_0, matmul_vjp_1)
