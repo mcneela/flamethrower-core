@@ -57,6 +57,7 @@ define_grad(np.square, 		lambda ans, g, x: g * 2 * x)
 define_grad(np.sqrt, 		lambda ans, g, x: g * 0.5 * x ** -0.5)
 define_grad(np.sinc, 		lambda ans, g, x: g * ((np.cos(np.pi * x) / x) - (np.sin(np.pi * x))/(np.pi * (x**2))))
 define_grad(np.reshape,		lambda ans, g, x, shape, order=None : np.reshape(g, np.shape(x), order=order))
+define_grad(np.roll,		lambda ans, g, x, shift, axis=None  : np.roll(g, -shift, axis=axis))
 
 def grad_transpose(ans, g, x, axes=None):
 	if axes is not None:
