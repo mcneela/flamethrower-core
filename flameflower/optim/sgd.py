@@ -15,9 +15,9 @@ class SGD(Optimizer):
 	def step(self, iter=1, closure=None):
 		for group in self.param_groups:
 			for p in group['params']:
-				if p.node().grad is None:
+				if p.grad is None:
 					continue
-				grad = p.node().grad
+				grad = p.grad
 
 				# state = self.state[p]
 
@@ -28,6 +28,6 @@ class SGD(Optimizer):
 				# state['step'] += 1
 				# print(f"Node: {p.node().name}, Grad: {grad}")
 
-				p._data -= (self.lr/iter) * grad
+				p.data -= (self.lr/iter) * grad
 
 		return None
