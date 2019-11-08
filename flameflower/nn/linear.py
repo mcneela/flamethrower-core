@@ -16,10 +16,10 @@ class Linear(Module):
 		if not init_fn:
 			init_fn = npr.randn
 		self.W = Tensor(init_fn(self.in_size, self.out_size))
-		self.b = Tensor(np.zeros((1,self.W.data().shape[1])))
+		self.b = Tensor(np.zeros((1, self.W.data().shape[1])))
 		self.new_param('W', self.W)
 		if self.use_bias:
-			self.b = Tensor(np.ones((1,self.W.data().shape[1])))
+			self.b = Tensor(np.ones((1, self.W.data().shape[1])))
 			self.new_param('b', self.b)
 
 	def forward(self, X):
