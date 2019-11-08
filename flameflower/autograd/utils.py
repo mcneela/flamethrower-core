@@ -1,8 +1,3 @@
-def subval(x, i, v):
-    x_ = list(x)
-    x_[i] = v
-    return tuple(x_)
-    
 def sum_with_none(x, y):
     if x is None:
         return y
