@@ -20,18 +20,17 @@ def mean_squared_error(y_hat, y):
 	l = (1 / n) * tl.sum((y_hat - y) ** 2)
 	return l
 
-def l2_loss(y_hat, y):
+def l2(y_hat, y):
 	return 0.5 * tl.sum((y_hat - y) ** 2)
 
-def l1_loss(y_hat, y):
+def l1(y_hat, y):
 	return tl.abs(y_hat - y)
 
 def kl_divergence(p, q):
 	return -tl.sum(p * tl.log(q / p))
 
-def huber_loss(y_hat, y, delta=1):
+def huber(y_hat, y, delta=1):
 	if tl.abs(y_hat - y) < delta:
 		return .5 * (y_hat - y) ** 2
 	else:
 		return delta * tl.abs(y_hat - y) - (delta / 2)
-		
