@@ -131,7 +131,7 @@ class Module(object):
 		"""
 		self._modules[name] = module
 
-	def _forward(self, *args, **kwargs):
+	def forward(self, *args, **kwargs):
 		raise NotImplementedError
 
 	def __call__(self, *args, **kwargs):

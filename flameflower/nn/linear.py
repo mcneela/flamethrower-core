@@ -22,7 +22,7 @@ class Linear(Module):
 			self.b = Tensor(np.ones((1,self.W.data().shape[1])))
 			self.new_param('b', self.b)
 
-	def _forward(self, X):
+	def forward(self, X):
 		if self.use_bias:
 			return X @ self.W + self.b
 		else:
