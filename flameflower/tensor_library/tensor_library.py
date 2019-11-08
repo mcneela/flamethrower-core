@@ -1,4 +1,4 @@
-from .call import Primitive
+from flameflower.autograd.call import Primitive
 import numpy as _np
 
 notrace_functions = [
@@ -16,4 +16,5 @@ def wrap_namespace(old, new):
         elif type(obj) in unchanged_types:
             new[name] = obj
 
+# Wrap numpy
 wrap_namespace(_np.__dict__, globals())
