@@ -1,4 +1,7 @@
 class _LRScheduler(object):
+	"""
+	Base class for learning rate schedulers.
+	"""
 	def __init__(self, starting_lr, iters_per_epoch=None):
 		self.curr_iter = 0
 		self.iters_per_epoch = iters_per_epoch
@@ -15,6 +18,11 @@ class _LRScheduler(object):
 		self.lr = self.starting_lr
 
 class LinearScheduler(_LRScheduler):
+	"""
+	Implements a linear decay learning rate schedule.
+	In other words, lr = lr / n where n is the current
+	iteration.
+	"""
 	def step(self):
 		self.curr_iter += 1
 		self.lr /= self.curr_iter
@@ -22,4 +30,3 @@ class LinearScheduler(_LRScheduler):
 			self.epoch += 1
 
 		return self.lr
-
