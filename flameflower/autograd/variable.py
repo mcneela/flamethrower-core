@@ -39,7 +39,10 @@ class Variable(object):
 	@property
 	def shape(self):
 		return self._data.shape
-	
+
+	@property
+	def dims(self):
+		return self._data.ndim
 
 	def __bool__(self):
 		return bool(self._data)
