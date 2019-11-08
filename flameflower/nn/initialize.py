@@ -6,6 +6,8 @@ for neural network parameter initialization schemes.
 """
 from __future__ import division
 
+import math
+
 import flameflower.autograd.tensor_library as tl
 import flameflower.autograd.tensor_library.random as tlr
 
@@ -66,4 +68,4 @@ def sparse(tensor, sparsity, std=0.01):
 		zero_idxs = row_idxs[:num_zeros]
 		X[zero_idxs, col_idx] = 0.
 	return X
-	
+
