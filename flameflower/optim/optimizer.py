@@ -67,7 +67,13 @@ class Optimizer(object):
 		raise NotImplementedError
 
 	def zero_grad(self):
+		"""
+		Method to zero out the grad attr
+		of all registered parameters.
+		Not technically needed since each
+		pass of backprop replaces the grad
+		attribute.
+		"""
 		for group in self.param_groups:
 			for p in group['params']:
-				p.node().grad.fill(0.)
-
+				p.grad.fill(0.)
