@@ -44,6 +44,10 @@ class Variable(object):
 	def dims(self):
 		return self._data.ndim
 
+	@property
+	def numel(self):
+		return self._data.size
+
 	def __bool__(self):
 		return bool(self._data)
 
