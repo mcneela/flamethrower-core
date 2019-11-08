@@ -13,6 +13,7 @@ class Node(object):
 	def init_root(self, *args, **kwargs):
 		raise NotImplementedError
 
+	@property
 	def is_root(self):
 		return self._is_root
 
@@ -28,17 +29,24 @@ class GradNode(Node):
 	A node that attaches to a `Variable`
 	for which we want to take a gradient.
 	"""
-	__slots__ = ['parents', 'grad', 'grad_fns', 'package', '_is_root']
-	def __init__(self, val, fn, args, kwargs, argnums, parents):
+	__slots__ = ['name', 'parents', 'grad', 'grad_fns', 'package', '_is_root']
+	def __init__(self, val, fn, args, kwargs, argnums, parents, name=None):
 		self._is_root = False
 		self.parents = parents
 		self.package = fn, val, args, kwargs, argnums
+		self.name = name
 		try:
 			self.grad_fns = grad_definitions[fn.fn.__name__]
 		except KeyError:
 			fn_name = getattr(fn, '__name__', fn)
 			raise NotImplementedError("Grad of {} wrt argnums {} not defined"
 									  .format(fn_name, argnums))
+
+	def __str__(self):
+		if self.name:
+			return self.name
+		else:
+			return "Unnamed GradNode Object"
 
 	def init_root(self):
 		self.parents = []

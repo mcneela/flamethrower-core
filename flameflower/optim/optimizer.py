@@ -1,4 +1,5 @@
 import flameflower.autograd as ag
+import numpy as np
 import logging
 
 class Optimizer(object):
@@ -7,7 +8,6 @@ class Optimizer(object):
 	"""
 	def __init__(self, params, defaults, name=None):
 		self._configure_logging(logfile=f"{name}.log")
-
 		self.params = params
 		self.defaults = defaults
 		self.name = name
@@ -65,3 +65,9 @@ class Optimizer(object):
 
 	def step(self, closure=None):
 		raise NotImplementedError
+
+	def zero_grad(self):
+		for group in self.param_groups:
+			for p in group['params']:
+				p.node().grad.fill(0.)
+

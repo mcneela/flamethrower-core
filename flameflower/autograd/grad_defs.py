@@ -24,11 +24,18 @@ def record_grad_defs_by_parity(grad_definitions):
 			grad_defs_by_parity[p] = [grad_fn]
 	return grad_defs_by_parity
 
+def replace_zero(x, val):
+	return anp.where(x, x, val)
+	
 # Multivariate gradients
 define_grad(np.add,			lambda ans, g, x, y : g, lambda ans, g, x, y :  g)
 define_grad(np.multiply,	lambda ans, g, x, y : g * y, lambda ans, g, x, y :  g * x)
 define_grad(np.subtract,	lambda ans, g, x, y : g, lambda ans, g, x, y: -g)
 define_grad(np.divide,		lambda ans, g, x, y : g / y, lambda ans, g, x, y:  g * -x / y**2)
+define_grad(np.power,
+	lambda ans, g, x, y : g * y * x ** np.where(y, y - 1, 1.),
+	lambda ans, g, x, y : g * np.log(replace_zero(x, 1.)) * ans)
+
 
 # Single variable gradients
 define_grad(np.exp,			lambda ans, g, x: g * ans)

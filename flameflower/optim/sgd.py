@@ -12,7 +12,7 @@ class SGD(Optimizer):
 			logging.error("Invalid learning rate: {} - should be >= 0.0".format(lr))
 			raise ValueError("Invalid learning rate: {} - should be >= 0.0".format(lr))
 
-	def step(self, closure=None):
+	def step(self, iter=1, closure=None):
 		for group in self.param_groups:
 			for p in group['params']:
 				if p.node().grad is None:
@@ -26,7 +26,8 @@ class SGD(Optimizer):
 
 				# lr = group['lr']
 				# state['step'] += 1
+				# print(f"Node: {p.node().name}, Grad: {grad}")
 
-				p._data -= self.lr * grad
+				p._data -= (self.lr/iter) * grad
 
 		return None

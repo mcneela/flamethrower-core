@@ -8,20 +8,31 @@ class Variable(object):
 	type_mappings = {}
 	types = set()
 
-	__slots__ = ['_data', '_node']
+	__slots__ = ['_data', '_node', 'data', 'node', 'grad', 'is_tracked']
 
 	def __init__(self, data, node=None, track=True):
 		self._data = data
 		self._node  = node
 		if not node and track:
 			self._node = GradNode.new_root()
+		self._is_tracked = track
 
+	@property
 	def data(self):
 		return self._data
 
+	@property
 	def node(self):
 		return self._node
 
+	@property
+	def grad(self):
+		if self._node and isinstance(self._node, GradNode):
+			return self._node_grad
+		else:
+			raise AttributeError("This Variable does not have a GradNode attached.")
+
+	@property
 	def is_tracked(self):
 		return self._is_tracked
 
