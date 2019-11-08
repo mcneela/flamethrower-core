@@ -172,12 +172,3 @@ class Module(object):
 		for self and all child modules
 		"""
 		return self.train(train_mode=False)
-
-	def zero_grad(self):
-		"""
-		Zeros the gradient for all parameters
-		in the module
-		"""
-		for param in self.params():
-			if param.grad:
-				param.grad = np.zeros_like(param.grad)
