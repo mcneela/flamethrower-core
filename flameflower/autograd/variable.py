@@ -36,6 +36,11 @@ class Variable(object):
 	def is_tracked(self):
 		return self._is_tracked
 
+	@property
+	def shape(self):
+		return self._data.shape
+	
+
 	def __bool__(self):
 		return bool(self._data)
 
