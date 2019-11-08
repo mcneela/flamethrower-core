@@ -29,19 +29,22 @@ class GradNode(Node):
 	A node that attaches to a `Variable`
 	for which we want to take a gradient.
 	"""
-	__slots__ = ['name', 'parents', 'grad', 'grad_fns', 'package', '_is_root']
+	__slots__ = ['name', 'parents', '_grad', 'grad_fns', 'package', '_is_root']
 	def __init__(self, val, fn, args, kwargs, argnums, parents, name=None):
 		self._is_root = False
 		self.parents = parents
 		self.package = fn, val, args, kwargs, argnums
 		self.name = name
 		try:
-			self.grad_fns = grad_definitions[fn.fn.__name__]
+			self.grad_fns = grad_definitions[name(fn)]
 		except KeyError:
-			fn_name = getattr(fn, '__name__', fn)
-			raise NotImplementedError("Grad of {} wrt argnums {} not defined"
-									  .format(fn_name, argnums))
+			fn_name = name(fn) 
+			raise NotImplementedError("Grad of {} wrt argnums {} not defined".format(fn_name, argnums))
 
+	@property
+	def grad(self):
+		return self._grad
+	
 	def __str__(self):
 		if self.name:
 			return self.name

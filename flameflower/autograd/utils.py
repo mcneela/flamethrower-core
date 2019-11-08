@@ -13,7 +13,10 @@ def name(primitive):
     Gets the __name__
     of a `Primitive`.
     """
-    return primitive.__name__
+    try:
+        return primitive.__name__()
+    except TypeError:
+        return primitive.__name__
 
 def topological_sort(end_node):
     """

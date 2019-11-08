@@ -8,7 +8,7 @@ class Variable(object):
 	type_mappings = {}
 	types = set()
 
-	__slots__ = ['_data', '_node', 'data', 'node', 'grad', 'is_tracked']
+	__slots__ = ['_data', '_node', '_is_tracked']
 
 	def __init__(self, data, node=None, track=True):
 		self._data = data
@@ -52,7 +52,7 @@ class Variable(object):
 				grad = node.grad_fns[argnum]
 				parent_grad = grad(value, g, *args, **kwargs)
 				outgrads[parent] = sum_with_none(outgrads.get(parent), parent_grad)
-				parent.grad = outgrads[parent]
+				parent._grad = outgrads[parent]
 		return g 
 
 	@classmethod
