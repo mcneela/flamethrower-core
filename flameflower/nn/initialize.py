@@ -45,6 +45,12 @@ def normalized(tensor):
 	low = -high
 	return tlr.uniform(low, high, size=tensor.shape)
 
+def glorot_uniform(tensor):
+	nin, nout = get_in_out_dims(tensor)
+	high = 1 / tl.sqrt(nin)
+	low = -high
+	return tlr.uniform(low, high, size=tensor.shape)
+
 def xavier_normal(tensor):
 	nin, nout = get_in_out_dims(tensor)
 	std = math.sqrt(2.0 / float(nin + nout))
@@ -68,4 +74,3 @@ def sparse(tensor, sparsity, std=0.01):
 		zero_idxs = row_idxs[:num_zeros]
 		X[zero_idxs, col_idx] = 0.
 	return X
-
