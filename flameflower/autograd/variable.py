@@ -28,7 +28,7 @@ class Variable(object):
 	@property
 	def grad(self):
 		if self._node and isinstance(self._node, GradNode):
-			return self._node_grad
+			return self._node._grad
 		else:
 			raise AttributeError("This Variable does not have a GradNode attached.")
 

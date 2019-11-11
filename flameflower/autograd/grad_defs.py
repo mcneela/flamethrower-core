@@ -72,6 +72,24 @@ def grad_transpose(ans, g, x, axes=None):
 	return np.transpose(g, axes)
 define_grad(np.transpose, grad_transpose)
 
+def repeat_to_match_shape(g, shape, dtype, axis, keepdims):
+	"""Returns the array g repeated along axis to fit vector space vs.
+	   Also returns the number of repetitions of the array."""
+	if shape == ():
+		return g, 1
+	axis = list(axis) if isinstance(axis, tuple) else axis
+	new_shape = np.array(shape)
+	new_shape[axis] = 1
+	num_reps = np.prod(np.array(shape)[axis])
+	# Can't use broadcast_to because of numpy bug: https://github.com/numpy/numpy/issues/9165
+	# return anp.broadcast_to(anp.reshape(g, new_shape), shape), num_reps
+	return np.reshape(g, new_shape) + np.zeros(shape, dtype=dtype), num_reps
+
+def grad_np_sum(ans, g, x, axis=None, keepdims=False, dtype=None):
+	shape, dtype = np.shape(x), np.result_type(x)
+	return repeat_to_match_shape(g, shape, dtype, axis, keepdims)[0]
+define_grad(np.sum, grad_np_sum)
+
 def unbroadcast(x, target_meta, broadcast_idx=0):
 	target_shape, target_ndim, target_iscomplex = target_meta
 	while np.ndim(x) > target_ndim:

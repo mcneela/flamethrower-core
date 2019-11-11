@@ -30,11 +30,11 @@ class GradNode(Node):
 	for which we want to take a gradient.
 	"""
 	__slots__ = ['name', 'parents', '_grad', 'grad_fns', 'package', '_is_root']
-	def __init__(self, val, fn, args, kwargs, argnums, parents, name=None):
+	def __init__(self, val, fn, args, kwargs, argnums, parents, node_name=None):
 		self._is_root = False
 		self.parents = parents
 		self.package = fn, val, args, kwargs, argnums
-		self.name = name
+		self.name = node_name
 		try:
 			self.grad_fns = grad_definitions[name(fn)]
 		except KeyError:

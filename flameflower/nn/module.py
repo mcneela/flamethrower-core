@@ -138,7 +138,7 @@ class Module(object):
 		Applies the forward pass to input arguments
 		"""
 		logging.info(f"Running forward pass on data: {args}")
-		return self._forward(*args, **kwargs)
+		return self.forward(*args, **kwargs)
 
 	def params(self):
 		"""

@@ -11,12 +11,6 @@ class Tensor(Variable):
 
 	def __getitem__(A, idx): return A[idx]
 
-	shape = property(lambda self: self._value.shape)
-	ndim = property(lambda self: self._value.ndim)
-	size = property(lambda self: self._value.size)
-	dtype = property(lambda self: self._value.dtype)
-	T = property(lambda self: tl.transpose(self))
-
 	def __len__(self): return len(self._value)
 
 	def __neg__(self): return tl.negative(self)

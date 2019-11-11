@@ -4,7 +4,7 @@ def sigmoid(x):
 	return 1 / (1 + tl.exp(-x))
 
 def softmax(x):
-	return tl.exp / (tl.sum(tl.exp(x)))
+	return tl.exp(x) / (tl.sum(tl.exp(x)))
 
 def relu(x):
 	return tl.max(0, x)
