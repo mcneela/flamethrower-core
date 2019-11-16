@@ -1,6 +1,9 @@
 from __future__ import absolute_import
-from .node import GradNode
-from .utils import sum_with_none, topological_sort
+# from .node import GradNode, NoGradNode
+# from .utils import sum_with_none, topological_sort, name
+# from .include import GradNode, NoGradNode, sum_with_none, topological_sort, name
+import flameflower.autograd.node as anode
+import flameflower.autograd.utils as utils
 
 import numpy as np
 
@@ -14,7 +17,7 @@ class Variable(object):
 		self._data = data
 		self._node  = node
 		if not node and track:
-			self._node = GradNode.new_root()
+			self._node = anode.GradNode.new_root()
 		self._is_tracked = track
 
 	@property
@@ -27,7 +30,7 @@ class Variable(object):
 
 	@property
 	def grad(self):
-		if self._node and isinstance(self._node, GradNode):
+		if self._node and isinstance(self._node, anode.GradNode):
 			return self._node._grad
 		else:
 			raise AttributeError("This Variable does not have a GradNode attached.")
@@ -54,16 +57,23 @@ class Variable(object):
 	__nonzero__ = __bool__
 
 	def backward(self):
-		end_node = self.node()
-		x = np.ones_like(self.data())
+		if isinstance(self.node, anode.NoGradNode):
+			# Hopefully there's only one parent
+			parent = self.node.parents[0]
+			return Variable(self.node.package[1], parent).backward()
+		end_node = self.node
+		x = np.ones_like(self.data)
 		outgrads = {end_node : x}
-		for node in topological_sort(end_node):
+		for node in utils.topological_sort(end_node):
 			g = outgrads.pop(node)
 			fun, value, args, kwargs, argnums = node.package
 			for argnum, parent in zip(argnums, node.parents):
 				grad = node.grad_fns[argnum]
-				parent_grad = grad(value, g, *args, **kwargs)
-				outgrads[parent] = sum_with_none(outgrads.get(parent), parent_grad)
+				try:
+					parent_grad = grad(value, g, *args, **kwargs)
+				except:
+					print(utils.name(node.package[0]))
+				outgrads[parent] = utils.sum_with_none(outgrads.get(parent), parent_grad)
 				parent._grad = outgrads[parent]
 		return g 
 

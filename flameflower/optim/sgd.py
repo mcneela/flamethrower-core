@@ -36,10 +36,10 @@ class SGD(Optimizer):
 			loss = closure()
 
 		for group in self.param_groups:
-			lr = group['lr']
-			use_momentum = group['use_momentum']
-			beta = group['beta']
-			lr_scheduler = group['lr_scheduler']
+			lr = self.defaults['lr']
+			use_momentum = self.defaults['use_momentum']
+			beta = self.defaults['beta']
+			lr_scheduler = self.defaults['lr_scheduler']
 			if lr_scheduler:
 				lr = lr_scheduler.step()
 
@@ -58,6 +58,6 @@ class SGD(Optimizer):
 					param_state['v'] = v
 					p.data += v
 				else:
-					p.data -= lr * grad
+					p._data -= lr * grad
 
 		return loss 

@@ -1,5 +1,11 @@
+import inspect
 import flameflower.autograd.tensor as ten
 import flameflower.autograd.variable as var
+import flameflower.autograd.node as anode
+# from .include import Tensor, Variable, NoGradNode, GradNode, no_trace_primitives, name
+# from .node import NoGradNode, GradNode
+import flameflower.autograd.grad_defs as gd
+from .utils import name
 
 def isvar(x):
 	return isinstance(x, var.Variable)
@@ -22,7 +28,40 @@ def get_argnums(var_args):
 	else:
 		return tuple(x[0])
 
-class Primitive(object):
+def find_var_args(args):
+	var_args = []
+	node_type = None
+	for argnum, arg in enumerate(args):
+		if isvar(arg):
+			var_args.append((argnum, arg))
+			node_type = type(arg.node)
+	return var_args, node_type
+
+def primitive(fn):
+	def f_wrapped(*args, **kwargs):
+		var_args, node_type = find_var_args(args)
+		if var_args:
+			argdata = get_data(args, var_args)
+			parents = get_parents(var_args)
+			argnums = get_argnums(var_args)
+			ans     = fn(*argdata, **kwargs)
+			if name(fn) in gd.no_trace_primitives:
+				# print(f"calling nograd!: {self.fn}")
+				# print(f"ans is!: {ans}")
+				node = anode.NoGradNode(ans, fn, argdata, kwargs, argnums, parents)
+				return ten.Tensor(ans, node)
+			else:
+				node = anode.GradNode(ans, fn, argdata, kwargs, argnums, parents)
+				return ten.Tensor(ans, node)
+		else:
+			try:
+				return fn(*args, **kwargs)
+			except TypeError:
+				return fn(fn, *args, **kwargs)
+	f_wrapped.__name__ = fn.__name__
+	return f_wrapped
+
+class Primitive2(object):
 	def __init__(self, fn):
 		self.fn = fn
 
@@ -33,22 +72,23 @@ class Primitive(object):
 			return "FlameFlower primitive with undefined name"
 
 	def __call__(self, *args, **kwargs):
-		var_args, node_type = self.find_var_args(args)
+		var_args, node_type = find_var_args(args)
 		if var_args:
 			argdata = get_data(args, var_args)
 			parents = get_parents(var_args)
 			argnums = get_argnums(var_args)
 			ans     = self(*argdata, **kwargs)
-			node    = node_type(ans, self, argdata, kwargs, argnums, parents)
-			return  ten.Tensor(ans, node)
+			if name(self.fn) in gd.no_trace_primitives:
+				# print(f"calling nograd!: {self.fn}")
+				# print(f"ans is!: {ans}")
+				node = anode.NoGradNode(ans, self, argdata, kwargs, argnums, parents)
+				return ten.Tensor(ans, node)
+			else:
+				node = anode.GradNode(ans, self, argdata, kwargs, argnums, parents)
+				return ten.Tensor(ans, node)
 		else:
-			return self.fn(*args, **kwargs)
+			try:
+				return self.fn(*args, **kwargs)
+			except TypeError:
+				return self.fn(self.fn, *args, **kwargs)
 
-	def find_var_args(self, args):
-		var_args = []
-		node_type = None
-		for argnum, arg in enumerate(args):
-			if isvar(arg):
-				var_args.append((argnum, arg))
-				node_type = type(arg._node)
-		return var_args, node_type

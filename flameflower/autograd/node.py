@@ -1,5 +1,8 @@
-from .utils import name
-from .grad_defs import grad_definitions
+# from .utils import name
+# from flameflower.autograd.grad_defs import grad_definitions
+# from .grad_defs import grad_definitions
+import flameflower.autograd.grad_defs as gd
+import flameflower.autograd.utils as utils
 
 class Node(object):
 	"""
@@ -35,10 +38,12 @@ class GradNode(Node):
 		self.parents = parents
 		self.package = fn, val, args, kwargs, argnums
 		self.name = node_name
+		# if name(fn) == 'argmax':
+		# 	grad_definitions[name(fn)] = {0: lambda ans, g, x, axis=None: x}
 		try:
-			self.grad_fns = grad_definitions[name(fn)]
+			self.grad_fns = gd.grad_definitions[utils.name(fn)]
 		except KeyError:
-			fn_name = name(fn) 
+			fn_name = utils.name(fn) 
 			raise NotImplementedError("Grad of {} wrt argnums {} not defined".format(fn_name, argnums))
 
 	@property
@@ -55,4 +60,26 @@ class GradNode(Node):
 		self.parents = []
 		self.package = (lambda x: x, None, (), {}, [])
 		self.grad_fns = {0: lambda g, ans, x, y: (), 1: lambda g, ans, x, y: ()}
+
+class NoGradNode(Node):
+	"""
+	A node that attaches to a `Variable`
+	for which we DO NOT want to take a gradient.
+	"""
+	__slots__ = ['name', 'parents', 'package', '_is_root']
+	def __init__(self, val, fn, args, kwargs, argnums, parents, node_name=None):
+		self._is_root = False
+		self.parents = parents
+		self.package = fn, val, args, kwargs, argnums
+		self.name = node_name
+
+	def __str__(self):
+		if self.name:
+			return self.name
+		else:
+			return "Unnamed GradNode Object"
+
+	def init_root(self):
+		self.parents = []
+		self.package = (lambda x: x, None, (), {}, [])
 

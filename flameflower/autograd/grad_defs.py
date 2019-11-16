@@ -1,16 +1,33 @@
 from itertools import count
-from .utils import name
+# from .include import name, primitive
+# from .call import primitive
+import flameflower.autograd.utils as utils
+import flameflower.autograd.call as call
 
 import numpy as np
 
 grad_definitions = {}
+no_trace_primitives = {}
 grad_defs_by_parity = {}
+
+nograd_functions = [
+	np.floor, np.ceil, np.round, np.rint, np.around, np.fix, np.trunc, np.all,
+	np.any, np.argmax, np.argmin, np.argpartition, np.argsort, np.argwhere, np.nonzero,
+	np.flatnonzero, np.count_nonzero, np.searchsorted, np.sign, np.ndim, np.shape,
+	np.floor_divide, np.logical_and, np.logical_or, np.logical_not, np.logical_xor,
+	np.isfinite, np.isinf, np.isnan, np.isneginf, np.isposinf, np.allclose, np.isclose,
+	np.array_equal, np.array_equiv, np.greater, np.greater_equal, np.less, np.less_equal,
+	np.equal, np.not_equal, np.iscomplexobj, np.iscomplex, np.size, np.isscalar,
+	np.isreal, np.zeros_like, np.ones_like, np.result_type]
+
+for fn in nograd_functions:
+	no_trace_primitives[utils.name(fn)] = True
 
 def define_grad(fn, *grads, **kwargs):
 	for argnum, partial in enumerate(grads):
-		if name(fn) not in grad_definitions:
-			grad_definitions[name(fn)] = {}
-		grad_definitions[name(fn)][argnum] = partial
+		if utils.name(fn) not in grad_definitions:
+			grad_definitions[utils.name(fn)] = {}
+		grad_definitions[utils.name(fn)][argnum] = partial
 
 def parity(fn):
 	return fn.__code__.co_argcount
@@ -25,22 +42,27 @@ def record_grad_defs_by_parity(grad_definitions):
 	return grad_defs_by_parity
 
 def replace_zero(x, val):
-	return anp.where(x, x, val)
+	return np.where(x, x, val)
 	
 # Multivariate gradients
-define_grad(np.add,			lambda ans, g, x, y : g, lambda ans, g, x, y :  g)
+define_grad(np.add,			lambda ans, g, x, y : unbroadcast_f(x, lambda g: g)(g), lambda ans, g, x, y : unbroadcast_f(y, lambda g: g)(g))
 define_grad(np.multiply,	lambda ans, g, x, y : g * y, lambda ans, g, x, y :  g * x)
-define_grad(np.subtract,	lambda ans, g, x, y : g, lambda ans, g, x, y: -g)
-define_grad(np.divide,		lambda ans, g, x, y : g / y, lambda ans, g, x, y:  g * -x / y**2)
+define_grad(np.subtract,	lambda ans, g, x, y : unbroadcast_f(x, lambda g: g)(g), lambda ans, g, x, y: unbroadcast_f(y, lambda g: -g)(g))
+define_grad(np.divide,		lambda ans, g, x, y : g / y, lambda ans, g, x, y:  -g * x / y ** 2)
 define_grad(np.power,
 	lambda ans, g, x, y : g * y * x ** np.where(y, y - 1, 1.),
 	lambda ans, g, x, y : g * np.log(replace_zero(x, 1.)) * ans)
-
+define_grad(np.divide,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y)(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
+define_grad(np.true_divide,	lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y)(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
 
 # Single variable gradients
+define_grad(np.negative,	lambda ans, g, x: -g)
 define_grad(np.exp,			lambda ans, g, x: g * ans)
 define_grad(np.exp2, 		lambda ans, g, x: g * ans * np.log(2))
 define_grad(np.expm1,		lambda ans, g, x: g * (ans + 1))
+define_grad(np.log,			lambda ans, g, x: g / x)
 define_grad(np.log2,		lambda ans, g, x: g / (x * np.log(2)))
 define_grad(np.log10, 		lambda ans, g, x: g / (x * np.log(10)))
 define_grad(np.log1p, 		lambda ans, g, x: g / (x + 1))
@@ -82,7 +104,7 @@ def repeat_to_match_shape(g, shape, dtype, axis, keepdims):
 	new_shape[axis] = 1
 	num_reps = np.prod(np.array(shape)[axis])
 	# Can't use broadcast_to because of numpy bug: https://github.com/numpy/numpy/issues/9165
-	# return anp.broadcast_to(anp.reshape(g, new_shape), shape), num_reps
+	# return np.broadcast_to(np.reshape(g, new_shape), shape), num_reps
 	return np.reshape(g, new_shape) + np.zeros(shape, dtype=dtype), num_reps
 
 def grad_np_sum(ans, g, x, axis=None, keepdims=False, dtype=None):
@@ -146,3 +168,38 @@ def metadata(A):
 	return np.shape(A), np.ndim(A), np.iscomplexobj(A)
 
 define_grad(np.matmul, matmul_vjp_0, matmul_vjp_1)
+
+@call.primitive
+def container_take(A, idx):
+	return A[idx]
+def grad_container_take(ans, g, A, idx):
+	x = np.zeros_like(A.data)
+	np.add.at(x, idx, g)
+	return x
+
+define_grad(container_take, grad_container_take)
+
+def unbroadcast(x, target_meta, broadcast_idx=0):
+	target_shape, target_ndim, target_iscomplex = target_meta
+	while np.ndim(x) > target_ndim:
+		x = np.sum(x, axis=broadcast_idx)
+	for axis, size in enumerate(target_shape):
+		if size == 1:
+			x = np.sum(x, axis=axis, keepdims=True)
+	if np.iscomplexobj(x) and not target_iscomplex:
+		x = np.real(x)
+	return x
+
+def unbroadcast_f(target, f):
+	target_meta = metadata(target)
+	return lambda g: unbroadcast(f(g), target_meta)
+
+def grad_chooser(ans, g, x, axis=None, keepdims=None):
+	shape, dtype = np.shape(x), np.result_type(x)
+	"""Builds gradient of functions that choose a single item, such as min or max."""
+	g_repeated, _ = repeat_to_match_shape(g, shape, dtype, axis, keepdims)
+	argmax_locations = x == repeat_to_match_shape(ans, shape, dtype, axis, keepdims)[0]
+	return g_repeated * argmax_locations \
+		/ np.sum(argmax_locations, axis=axis, keepdims=True)
+
+define_grad(np.max, grad_chooser)

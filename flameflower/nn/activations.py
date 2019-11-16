@@ -1,10 +1,26 @@
+import sys
 import flameflower.autograd.tensor_library as tl
 
 def sigmoid(x):
 	return 1 / (1 + tl.exp(-x))
 
 def softmax(x):
-	return tl.exp(x) / (tl.sum(tl.exp(x)))
+	# sumval = 0
+	# y = tl.exp(x)
+	# for x in y:
+	# 	sumval += x
+	return tl.exp(x) / (tl.sum(tl.exp(x), axis=1))
+	# return y / sumval
+	# sumval = 0
+	# for x in y:
+	# 	for z in x:
+	# 		sumval += z
+	# return y / sumval
+
+def softmax(x, axis=None):
+	x = x - tl.max(x, axis=axis, keepdims=True)
+	y = tl.exp(x)
+	return y / tl.sum(y, axis=axis, keepdims=True)
 
 def relu(x):
 	return tl.max(0, x)

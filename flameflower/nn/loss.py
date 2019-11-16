@@ -6,7 +6,7 @@ deep neural networks.
 (C) 2019 - MLephant, FlameFlower
 """
 from __future__ import division
-
+import sys
 import flameflower.autograd.tensor_library as tl
 
 def cross_entropy(y_hat, y):
@@ -14,8 +14,20 @@ def cross_entropy(y_hat, y):
 	Cross-entropy loss, used for
 	classification with n classes.
 	"""
-	return -tl.sum(y * tl.log(y_hat))
+	# tot = 0
+	# print(f"y is: {y.data}")
+	# for label in y_hat:
+	# 	tot += tl.log(y[label])
+	# return -tot
+	total = 0
+	for label in y_hat:
+		total += -tl.sum(log_softmax(y[label]))
+	return total / len(y_hat)
 
+def log_softmax(x, axis=None):
+	b = tl.max(x, axis=axis)
+	return (x - b) - tl.log(tl.sum(tl.exp(x - b), axis=axis))
+	
 def binary_cross_entropy(y_hat, y):
 	"""
 	Binary cross-entropy loss, used
