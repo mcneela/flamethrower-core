@@ -1,0 +1,32 @@
+root - INFO - Creating new param with name: W and value: <flameflower.autograd.tensor.Tensor object at 0x104b2ce58>
+root - INFO - Creating new param with name: b and value: <flameflower.autograd.tensor.Tensor object at 0x104b8d048>
+root - INFO - Creating new param with name: W and value: <flameflower.autograd.tensor.Tensor object at 0x104b2cef8>
+root - INFO - Creating new param with name: b and value: <flameflower.autograd.tensor.Tensor object at 0x104b8d1d8>
+root - INFO - Running forward pass on data: (array([[ 1.76405235,  0.40015721,  0.97873798, ...,  1.78587049,
+         0.12691209,  0.40198936],
+       [ 1.8831507 , -1.34775906, -1.270485  , ...,  0.82350415,
+         2.16323595,  1.33652795],
+       [-0.36918184, -0.23937918,  1.0996596 , ...,  0.58295368,
+        -0.39944903,  0.37005589],
+       ...,
+       [-0.97576034, -0.17103998, -0.3755131 , ..., -1.29881936,
+         0.93809074, -0.12366762],
+       [-0.45734712, -0.71915982,  0.89480042, ..., -1.83230658,
+         0.49111905, -0.05605656],
+       [-0.71766819, -1.8872069 ,  0.57807387, ...,  1.68985759,
+         0.19996649, -1.2243307 ]]),)
+root - INFO - Running forward pass on data: (array([[ 1.76405235,  0.40015721,  0.97873798, ...,  1.78587049,
+         0.12691209,  0.40198936],
+       [ 1.8831507 , -1.34775906, -1.270485  , ...,  0.82350415,
+         2.16323595,  1.33652795],
+       [-0.36918184, -0.23937918,  1.0996596 , ...,  0.58295368,
+        -0.39944903,  0.37005589],
+       ...,
+       [-0.97576034, -0.17103998, -0.3755131 , ..., -1.29881936,
+         0.93809074, -0.12366762],
+       [-0.45734712, -0.71915982,  0.89480042, ..., -1.83230658,
+         0.49111905, -0.05605656],
+       [-0.71766819, -1.8872069 ,  0.57807387, ...,  1.68985759,
+         0.19996649, -1.2243307 ]]),)
+root - INFO - Running forward pass on data: (<flameflower.autograd.tensor.Tensor object at 0x104b8d318>,)
+root - INFO - Running forward pass on data: (<flameflower.autograd.tensor.Tensor object at 0x104b8d728>,)
