@@ -3,7 +3,7 @@ import flameflower.autograd.tensor_library as tl
 def sigmoid(x):
 	return 1 / (1 + tl.exp(-x))
 
-def softmax(x, axis=None):
+def softmax(x, axis=1):
 	x = x - tl.max(x, axis=axis, keepdims=True)
 	y = tl.exp(x)
 	return y / tl.sum(y, axis=axis, keepdims=True)

@@ -3,6 +3,7 @@ from flameflower.autograd import Tensor
 
 import flameflower.autograd.tensor_library as tl
 import flameflower.autograd.tensor_library.random as tlr
+import flameflower.nn.initialize as init
 
 tlr.seed(0)
 class Linear(Module):
@@ -15,7 +16,7 @@ class Linear(Module):
 
 	def _init_params(self, init_fn=None):
 		if not init_fn:
-			init_fn = tlr.randn
+			init_fn = init.xavier_normal
 		self.W = Tensor(init_fn(self.in_size, self.out_size))
 		self.b = Tensor(tl.zeros((1, self.W.shape[1])))
 		self.new_param('W', self.W)

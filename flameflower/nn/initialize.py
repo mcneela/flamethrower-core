@@ -35,26 +35,26 @@ def get_in_out_dims(tensor):
 
 	return nin, nout
 
-def normalized(tensor):
+def normalized(nin, nout):
 	"""
 	See Glorot and Bengio (2010)
 	Pg. 253, Eq. (16)
 	"""
-	nin, nout = get_in_out_dims(tensor)
+	# nin, nout = get_in_out_dims(tensor)
 	high = tl.sqrt(6 / float(nin + nout))
 	low = -high
-	return tlr.uniform(low, high, size=tensor.shape)
+	return tlr.uniform(low, high, size=(nin, nout))
 
-def glorot_uniform(tensor):
-	nin, nout = get_in_out_dims(tensor)
+def glorot_uniform(nin, nout):
+	# nin, nout = get_in_out_dims(tensor)
 	high = 1 / tl.sqrt(nin)
 	low = -high
-	return tlr.uniform(low, high, size=tensor.shape)
+	return tlr.uniform(low, high, size=(nin, nout))
 
-def xavier_normal(tensor):
-	nin, nout = get_in_out_dims(tensor)
+def xavier_normal(nin, nout):
+	# nin, nout = get_in_out_dims(tensor)
 	std = math.sqrt(2.0 / float(nin + nout))
-	return tlr.normal(scale=std, size=tensor.shape)
+	return tlr.normal(scale=std, size=(nin, nout))
 
 def sparse(tensor, sparsity, std=0.01):
 	"""
