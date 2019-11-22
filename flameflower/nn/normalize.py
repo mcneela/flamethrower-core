@@ -14,7 +14,6 @@ class BatchNorm(Module):
 	def forward(self, X):
 		n = X.shape[0]
 		mu = tl.sum(X, axis=0) / n
-		X - mu
 		std = tl.sum((X - mu) ** 2, axis=0) / n
 		x_hat = (X - mu) / tl.sqrt(std + self.eps)
 		y = self.gamma * x_hat + self.beta
