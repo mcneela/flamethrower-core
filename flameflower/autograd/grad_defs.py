@@ -55,6 +55,8 @@ define_grad(np.divide,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
 define_grad(np.true_divide,	lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y)(g),
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
+define_grad(np.maximum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g: g * balanced_eq(x, ans, y))(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g: g * balanced_eq(y, ans, x))(g))
 
 # Single variable gradients
 define_grad(np.negative,	lambda ans, g, x: -g)
@@ -202,3 +204,6 @@ def grad_chooser(ans, g, x, axis=None, keepdims=None):
 		/ np.sum(argmax_locations, axis=axis, keepdims=True)
 
 define_grad(np.max, grad_chooser)
+
+def balanced_eq(x, z, y):
+	return (x == z) / (1.0 + (x == y))

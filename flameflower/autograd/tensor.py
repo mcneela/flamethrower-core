@@ -40,6 +40,7 @@ class Tensor(var.Variable):
 	def __gt__(self, other): return tl.greater(self, other)
 	def __ge__(self, other): return tl.greater_equal(self, other)
 	def __lt__(self, other): return tl.less(self, other)
+	def __le__(self, other): return tl.less_equal(self, other)
 	def __abs__(self): return tl.abs(self)
 	def __hash__(self): return id(self)
 
