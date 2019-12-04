@@ -62,18 +62,5 @@ class Optimizer(object):
 		logging.info(f"Setting state: {state}")
 		self.__dict__.update(state)
 
-
 	def step(self, closure=None):
 		raise NotImplementedError
-
-	def zero_grad(self):
-		"""
-		Method to zero out the grad attr
-		of all registered parameters.
-		Not technically needed since each
-		pass of backprop replaces the grad
-		attribute.
-		"""
-		for group in self.param_groups:
-			for p in group['params']:
-				p.grad.fill(0.)
