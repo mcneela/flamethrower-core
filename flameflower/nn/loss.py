@@ -14,11 +14,6 @@ def cross_entropy(y_hat, y):
 	Cross-entropy loss, used for
 	classification with n classes.
 	"""
-	# tot = 0
-	# print(f"y is: {y.data}")
-	# for label in y_hat:
-	# 	tot += tl.log(y[label])
-	# return -tot
 	total = 0
 	for label in y_hat:
 		total += -tl.sum(log_softmax(y[label]))
