@@ -45,18 +45,20 @@ def replace_zero(x, val):
 	return np.where(x, x, val)
 	
 # Multivariate gradients
-define_grad(np.add,			lambda ans, g, x, y : unbroadcast_f(x, lambda g: g)(g), lambda ans, g, x, y : unbroadcast_f(y, lambda g: g)(g))
-define_grad(np.multiply,	lambda ans, g, x, y : g * y, lambda ans, g, x, y :  g * x)
-define_grad(np.subtract,	lambda ans, g, x, y : unbroadcast_f(x, lambda g: g)(g), lambda ans, g, x, y: unbroadcast_f(y, lambda g: -g)(g))
-define_grad(np.power,
-	lambda ans, g, x, y : g * y * x ** np.where(y, y - 1, 1.),
-	lambda ans, g, x, y : g * np.log(replace_zero(x, 1.)) * ans)
+define_grad(np.add,			lambda ans, g, x, y : unbroadcast_f(x, lambda g: g)(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g: g)(g))
+define_grad(np.subtract,	lambda ans, g, x, y : unbroadcast_f(x, lambda g: g)(g), 
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g: -g)(g))
+define_grad(np.power,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * y * x ** np.where(y, y - 1, 1.))(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * np.log(replace_zero(x, 1.)) * ans)(g))
+define_grad(np.multiply,	lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * y)(g), 
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * x)(g))
 define_grad(np.divide,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y)(g),
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
 define_grad(np.true_divide,	lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y)(g),
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
-define_grad(np.maximum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g: g * balanced_eq(x, ans, y))(g),
-							lambda ans, g, x, y : unbroadcast_f(y, lambda g: g * balanced_eq(y, ans, x))(g))
+define_grad(np.maximum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * balanced_eq(x, ans, y))(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * balanced_eq(y, ans, x))(g))
 
 # Single variable gradients
 define_grad(np.negative,	lambda ans, g, x: -g)
