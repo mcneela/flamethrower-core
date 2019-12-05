@@ -9,7 +9,7 @@ def softmax(x, axis=1):
 	return y / tl.sum(y, axis=axis, keepdims=True)
 
 def relu(x):
-	return tl.max(0, x)
+	return tl.maximum(0, x)
 
 def elu(x, alpha=1.0):
 	return relu(x) + tl.min(0, alpha * (tl.exp(x) - 1))

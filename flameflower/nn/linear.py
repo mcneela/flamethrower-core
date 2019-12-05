@@ -16,15 +16,15 @@ class Linear(Module):
 	def _init_params(self, init_fn=None):
 		if not init_fn:
 			init_fn = init.glorot_uniform
-		self.W = Tensor(init_fn(self.in_size, self.out_size))
-		self.b = Tensor(tl.zeros((1, self.W.shape[1])))
+		self.W = Tensor(init_fn(self.out_size, self.in_size))
+		self.b = Tensor(tl.zeros((1, self.W.shape[0])))
 		self.new_param('W', self.W)
 		if self.use_bias:
-			self.b = Tensor(tl.ones((1, self.W.shape[1])))
+			self.b = Tensor(init_fn(1, self.W.shape[0]))
 			self.new_param('b', self.b)
 
 	def forward(self, X):
+		out = X @ tl.transpose(self.W)
 		if self.use_bias:
-			return X @ self.W + self.b
-		else:
-			return X @ self.W
+			out += self.b
+		return out
