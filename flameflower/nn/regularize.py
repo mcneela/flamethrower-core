@@ -19,3 +19,36 @@ class Dropout(Module):
 		mask = tl.random.uniform(0, 1, size=X.shape)
 		mask = mask < self.p
 		return X * mask
+
+class L2Regularizer(Module):
+	def __init__(self, weights, scale=1):
+		super(L2Regularizer, self).__init__()
+		try:
+			iter(weights)
+		except TypeError:
+			weights = [weights]
+		self.weights = weights
+		self.scale = scale
+
+	def forward(self):
+		term = 0
+		for w in self.weights:
+			term += 0.5 * tl.sum(tl.square(w))
+		return self.scale * term
+
+class L1Regularizer(Module):
+	def __init__(self, weights, scale=1):
+		super(L1Regularizer, self).__init__()
+		try:
+			iter(weights)
+		except TypeError:
+			weights = [weights]
+		self.weights = weights
+		self.scale = scale
+
+	def forward(self):
+		term = 0
+		for w in self.weights:
+			term += tl.sum(tl.abs(w))
+		return self.scale * term
+		
