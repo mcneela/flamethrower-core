@@ -26,7 +26,7 @@ def log_softmax(x, axis=None):
 def binary_cross_entropy(y_hat, y):
 	"""
 	Binary cross-entropy loss, used
-	for classification with n classes.
+	for classification with 2 classes.
 	"""
 	return -y * tl.log(y_hat) - (1 - y) * tl.log(1 - y_hat)
 
@@ -42,6 +42,8 @@ def mean_squared_error(y_hat, y):
 def l2(y_hat, y):
 	"""
 	Loss function using the L2 norm.
+	Equivalent to minimization with
+	MSE loss.
 	"""
 	return 0.5 * tl.sum((y_hat - y) ** 2)
 
