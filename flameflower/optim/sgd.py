@@ -1,4 +1,6 @@
 from .optimizer import Optimizer
+
+import logging
 import flameflower.autograd.tensor_library as tl
 
 class SGD(Optimizer):
@@ -23,6 +25,9 @@ class SGD(Optimizer):
 		defaults = dict(lr=lr, use_momentum=use_momentum,
 						beta=beta, lr_scheduler=lr_scheduler)
 		super(SGD, self).__init__(params, defaults)
+
+	def __name__(self):
+		return "stochastic_gradient_descent"
 
 	def __setstate__(self, state):
 		super(SGD, self).__setstate__(state)
@@ -58,6 +63,6 @@ class SGD(Optimizer):
 					param_state['v'] = v
 					p.data += v
 				else:
-					p._data -= lr * grad
+					p.data -= lr * grad
 
 		return loss 
