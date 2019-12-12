@@ -66,7 +66,7 @@ class Variable(object):
 		outgrads = {end_node : x}
 		for node in utils.topological_sort(end_node):
 			g = outgrads.pop(node)
-			fun, value, args, kwargs, argnums = node.package
+			fn, value, args, kwargs, argnums = node.package
 			for argnum, parent in zip(argnums, node.parents):
 				grad = node.grad_fns[argnum]
 				try:
