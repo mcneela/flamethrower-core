@@ -68,9 +68,9 @@ class Variable(object):
 			g = outgrads.pop(node)
 			fn, value, args, kwargs, argnums = node.package
 			for argnum, parent in zip(argnums, node.parents):
-				grad = node.grad_fns[argnum]
+				grad_fn = node.grad_fns[argnum]
 				try:
-					parent_grad = grad(value, g, *args, **kwargs)
+					parent_grad = grad_fn(value, g, *args, **kwargs)
 				except:
 					print(utils.name(node.package[0]))
 				outgrads[parent] = utils.sum_with_none(outgrads.get(parent), parent_grad)
