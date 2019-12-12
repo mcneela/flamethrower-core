@@ -74,7 +74,7 @@ class Variable(object):
 				except:
 					print(utils.name(node.package[0]))
 				outgrads[parent] = utils.sum_with_none(outgrads.get(parent), parent_grad)
-				parent._grad = outgrads[parent]
+				parent.grad = outgrads[parent]
 		return g 
 
 	@classmethod
