@@ -1,7 +1,9 @@
+from .utils import get_logger
+
 from collections import OrderedDict
-import logging
 import pickle
 
+logger = get_logger()
 
 class Module(object):
 	"""
@@ -22,17 +24,6 @@ class Module(object):
 		self._children = OrderedDict()
 		self._state = OrderedDict()
 		self._modules = OrderedDict()
-		self._configure_logging()
-
-	def _configure_logging(self, logfile=None):
-		if logfile is None:
-			name = self.__name__
-			if name:
-				logfile = f"{name}.log"
-			else:
-				logfile = 'default.log'
-		logging.basicConfig(level=logging.INFO, filename=logfile, filemode='w',
-							format='%(name)s - %(levelname)s - %(message)s')
 
 	def __name__(self):
 		return None
@@ -47,8 +38,8 @@ class Module(object):
 		if obj is not None and not isinstance(obj, ff.Tensor):
 			raise TypeError("Buffer value must be None or a Tensor, got object of type {}".format(type(obj)))
 		if name in self._buffers:
-			logging.warning(f"Overriding {name} buffer having value {self._buffers[name]} with {obj}")
-		logging.info(f"Creating new buffer with name: {name} and value: {obj}")
+			logger.warning(f"Overriding {name} buffer having value {self._buffers[name]} with {obj}")
+		logger.info(f"Creating new buffer with name: {name} and value: {obj}")
 		self._buffers[name] = obj
 
 	def named_modules(self, memo=None, prefix=''):
@@ -111,11 +102,11 @@ class Module(object):
 			yield elem
 
 	def new_param(self, name, param):
-		logging.info(f"Creating new param with name: {name} and value: {param}")
+		logger.info(f"Creating new param with name: {name} and value: {param}")
 		self._params[name] = param
 
 	def add_module(self, name, module):
-		logging.info(f"Adding module with name: {name} and value: {module} to internal modules.")
+		logger.info(f"Adding module with name: {name} and value: {module} to internal modules.")
 		self._modules[name] = module
 
 	def add_module(self, name, module):
@@ -137,7 +128,7 @@ class Module(object):
 		"""
 		Applies the forward pass to input arguments
 		"""
-		logging.info(f"Running forward pass on data: {args}")
+		logger.info(f"Running forward pass on data: {args}")
 		return self.forward(*args, **kwargs)
 
 	def params(self):
@@ -159,7 +150,7 @@ class Module(object):
 		Sets global training mode to train_mode=True
 		for self and all child modules
 		"""
-		logging.info(f"Setting training mode to {train_mode}.")
+		logger.info(f"Setting training mode to {train_mode}.")
 		self.is_training = train_mode 
 		for child in self.children():
 			child.train(train_mode)

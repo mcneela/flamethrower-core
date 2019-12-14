@@ -3,6 +3,8 @@ from .optimizer import Optimizer
 import logging
 import flameflower.autograd.tensor_library as tl
 
+logger = logging.getLogger(__name__)
+
 class SGD(Optimizer):
 	"""
 	Implements Stochastic Gradient Descent with and without momentum.
@@ -12,13 +14,13 @@ class SGD(Optimizer):
 
 		# Perform value checking on the keyword arguments/
 		if lr < 0.0:
-			logging.error("Invalid learning rate: {} - should be >= 0.0".format(lr))
+			logger.error("Invalid learning rate: {} - should be >= 0.0".format(lr))
 			raise ValueError("Invalid learning rate: {} - should be >= 0.0".format(lr))
 		if use_momentum and beta <= 0:
-			logging.error("Using momentum, but invalid beta value: {} - should be >= 0.0".format(lr))
+			logger.error("Using momentum, but invalid beta value: {} - should be >= 0.0".format(lr))
 			raise ValueError("Using momentum, but invalid momentum value: {} - should be >= 0.0".format(lr))
 		if beta < 0.0:
-			logging.error("Invalid beta value: {} - should be >= 0.0".format(lr))
+			logger.error("Invalid beta value: {} - should be >= 0.0".format(lr))
 			raise ValueError("Invalid momentum value: {} - should be >= 0.0".format(lr))
 
 		# Set Optimizer defaults and __init__ base with these.

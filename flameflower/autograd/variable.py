@@ -24,6 +24,10 @@ class Variable(object):
 	def data(self):
 		return self._data
 
+	@data.setter
+	def data(self, data):
+		self._data = data
+
 	@property
 	def node(self):
 		return self._node
@@ -74,7 +78,7 @@ class Variable(object):
 				except:
 					print(utils.name(node.package[0]))
 				outgrads[parent] = utils.sum_with_none(outgrads.get(parent), parent_grad)
-				parent.grad = outgrads[parent]
+				parent._grad = outgrads[parent]
 		return g 
 
 	@classmethod

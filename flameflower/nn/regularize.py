@@ -1,5 +1,10 @@
 import flameflower.autograd.tensor_library as tl
 from .module import Module
+from .utils import get_logger
+
+import logging
+
+logger = get_logger()
 
 class Dropout(Module):
 	def __init__(self, p=0.5, on=True):
@@ -14,6 +19,7 @@ class Dropout(Module):
 		self.on = True
 
 	def forward(self, X):
+		logger.info(f"Using dropout on data: {X} with probability: {self.p}")
 		if not self.on:
 			return X
 		mask = tl.random.uniform(0, 1, size=X.shape)
@@ -31,6 +37,7 @@ class L2Regularizer(Module):
 		self.scale = scale
 
 	def forward(self):
+		logger.info(f"Using L2 Regularization")
 		term = 0
 		for w in self.weights:
 			term += 0.5 * tl.sum(tl.square(w))
@@ -47,6 +54,7 @@ class L1Regularizer(Module):
 		self.scale = scale
 
 	def forward(self):
+		logger.info(f"Using L1 Regularization")
 		term = 0
 		for w in self.weights:
 			term += tl.sum(tl.abs(w))
