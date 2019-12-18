@@ -55,8 +55,10 @@ def threshold(x, val):
 		return x
 	return val
 
-def softmin(x):
-	return tl.exp(-x) / (tl.sum(tl.exp(-x)))
+def softmin(x, axis=1):
+	x = -x - tl.max(x, axis=axis, keepdims=True)
+	y = tl.exp(x)
+	return y / tl.sum(y, axis=axis, keepdims=True)
 
 def log_softmax(x):
 	return tl.log(softmax(x))
