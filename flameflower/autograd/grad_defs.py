@@ -57,8 +57,10 @@ define_grad(np.divide,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
 define_grad(np.true_divide,	lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g / y)(g),
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * x / y**2)(g))
-define_grad(np.maximum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * balanced_eq(x, ans, y))(g),
-							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * balanced_eq(y, ans, x))(g))
+define_grad(np.maximum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * max_min_grad(x, ans, y))(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * max_min_grad(y, ans, x))(g))
+define_grad(np.minimum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * max_min_grad(x, ans, y))(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * max_min_grad(y, ans, x))(g))
 
 # Single variable gradients
 define_grad(np.negative,	lambda ans, g, x: -g)
@@ -204,8 +206,9 @@ def grad_chooser(ans, g, x, axis=None, keepdims=None):
 	argmax_locations = x == repeat_to_match_shape(ans, shape, dtype, axis, keepdims)[0]
 	return g_repeated * argmax_locations \
 		/ np.sum(argmax_locations, axis=axis, keepdims=True)
-
 define_grad(np.max, grad_chooser)
 
-def balanced_eq(x, z, y):
-	return (x == z) / (1.0 + (x == y))
+def max_min_grad(x, ans, y):
+	if x == ans:
+		return 1
+	return 0
