@@ -80,3 +80,16 @@ def huber(y_hat, y, delta=1, regularizer=None):
 		return .5 * (y_hat - y) ** 2 + regularizer()
 	else:
 		return delta * tl.abs(y_hat - y) - (delta / 2) + regularizer()
+
+def huber_binary_loss(y_hat, y, delta=1, regularizer=None):
+	if y_hat == 0:
+		y_hat = -1
+	if y == 0:
+		y = -1
+	if regularizer is None:
+		regularizer = lambda: 0
+	if y_hat * y >= -1:
+		return tl.max(0, 1 - y_hat * y) ** 2
+	else:
+		return -4 * y_hat * y
+
