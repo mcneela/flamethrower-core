@@ -53,7 +53,7 @@ def l2(y_hat, y, regularizer=None):
 	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	return 0.5 * tl.sum((y_hat - y) ** 2) + regularizer()
+	return 0.5 * tl.sum(tl.sqrt((y_hat - y) ** 2)) + regularizer()
 
 def l1(y_hat, y, regularizer=None):
 	"""
