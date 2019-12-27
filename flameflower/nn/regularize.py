@@ -78,9 +78,12 @@ class ElasticNetRegularizer(Module):
 			term += self.lambda1 * tl.sum(tl.abs(w)) \
 			      + self.lambda2 * tl.sum(tl.square(w))
 		return term
-		
 
-
+def label_smoother(labels, eps=0.05):
+	K = len(labels)
+	labels[labels == 0] = eps / (K - 1)
+	labels[labels == 1] = 1 - eps
+	return labels
 
 
 
