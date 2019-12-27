@@ -59,4 +59,29 @@ class L1Regularizer(Module):
 		for w in self.weights:
 			term += tl.sum(tl.abs(w))
 		return self.scale * term
+
+class ElasticNetRegularizer(Module):
+	def __init__(self, weights, lambda1=0.5, lambda2=0.5):
+		super(ElasticNetRegularizer, self).__init__()
+		try:
+			iter(weights)
+		except TypeError:
+			weights = [weights]
+		self.weights = weights
+		self.lambda1 = lambda1
+		self.lambda2 = lambda2
+
+	def forward(self):
+		logger.info("Using elastic net regularization.")
+		term = 0
+		for w in self.weights:
+			term += self.lambda1 * tl.sum(tl.abs(w)) \
+			      + self.lambda2 * tl.sum(tl.square(w))
+		return term
+		
+
+
+
+
+
 		
