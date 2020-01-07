@@ -1,7 +1,7 @@
-# FlameFlower
+# Flamethrower
 
-FlameFlower is a best-in-class deep learning library intended 
-for use in the FlameFlower (TM) course. Students learn to build
+Flamethrower is a best-in-class deep learning library intended 
+for use in the Flamethrower deep learning course. Students learn to build
 their own deep learning library, completely from scratch, and
 then use it to train their own neural network models.
 
@@ -40,10 +40,11 @@ experiment? Do they try and compare a wide variety of models on
 a single task, do they integrate multiple architectures into a 
 single ensemble, do they perform cross-validation passes and 
 rigorous hyperparameter searches? Likely not. All they learn is 
-a formula. Ingest data - throw together a few Tensorflow layers 
-- choose a loss function - get decent accuracy - rinse and 
+a formula. Ingest data, throw together a few Tensorflow layers,
+choose a loss function, get decent accuracy, rinse and 
 repeat. Is this really sufficient? Is someone who has completed
-one of these courses truly suited for an entry-level machine learning role at a top tech company, and can they really apply 
+one of these courses truly suited for an entry-level machine learning
+role at a top tech company, and can they really apply 
 the knowledge they've learned effectively in their job without 
 really understanding what's going on under the hood of the 
 systems they utilize? Telling a student to call loss.backward() 
@@ -53,10 +54,7 @@ What's more, will they be able to debug the CUDA errors that
 inevitably arise when they construct an invalid model of their 
 data? Without understanding how our tools work, we can't 
 effectively build, and our development remains stymied by these 
-very same tools' constraints. Can you imagine going to an 
-interview for a company like Microsoft or Google and being asked 
-to construct an optimal sparse matrix implementation without at 
-least some rough idea of how sparse matrices actually work? Can 
+very same tools' constraints. Can 
 you imagine trying to implement your own custom CUDA kernels 
 when you're unfamiliar with issues of numerical instability, 
 low-level programming, and other caveats? In this course, we'll 
@@ -80,5 +78,4 @@ complex models in Computer Vision, NLP, and Reinforcement
 Learning atop this solid, underlying foundation. And when 
 something breaks, we won't be left scratching our heads, because 
 we'll have built the framework we're running and will be 
-intimately familiar with its implementation. And from this 
-knowledge, we'll smile.
+intimately familiar with its implementation.
