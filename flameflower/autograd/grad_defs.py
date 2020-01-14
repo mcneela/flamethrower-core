@@ -99,22 +99,10 @@ def grad_transpose(ans, g, x, axes=None):
 	return np.transpose(g, axes)
 define_grad(np.transpose, grad_transpose)
 
-def repeat_to_match_shape(g, shape, dtype, axis, keepdims):
-	"""Returns the array g repeated along axis to fit vector space vs.
-	   Also returns the number of repetitions of the array."""
-	if shape == ():
-		return g, 1
-	axis = list(axis) if isinstance(axis, tuple) else axis
-	new_shape = np.array(shape)
-	new_shape[axis] = 1
-	num_reps = np.prod(np.array(shape)[axis])
-	# Can't use broadcast_to because of numpy bug: https://github.com/numpy/numpy/issues/9165
-	# return np.broadcast_to(np.reshape(g, new_shape), shape), num_reps
-	return np.reshape(g, new_shape) + np.zeros(shape, dtype=dtype), num_reps
-
 def grad_np_sum(ans, g, x, axis=None, keepdims=False, dtype=None):
 	shape, dtype = np.shape(x), np.result_type(x)
-	return repeat_to_match_shape(g, shape, dtype, axis, keepdims)[0]
+	result = np.broadcast_to(g, shape)
+	return result.as_type(dtype)
 define_grad(np.sum, grad_np_sum)
 
 def unbroadcast(x, target_meta, broadcast_idx=0):
@@ -159,12 +147,12 @@ def matmul_adjoint_1(A, G, A_ndim, B_meta):
 		result = np.squeeze(result, np.ndim(G) - 1)
 	return unbroadcast(result, B_meta)
 
-def matmul_vjp_0(ans, g, A, B):
+def matmul_grad_A(ans, g, A, B):
 	A_meta = metadata(A)
 	B_ndim = np.ndim(B)
 	return matmul_adjoint_0(B, g, A_meta, B_ndim)
 
-def matmul_vjp_1(ans, g, A, B):
+def matmul_grad_B(ans, g, A, B):
 	A_ndim = np.ndim(A)
 	B_meta = metadata(B)
 	return matmul_adjoint_1(A, g, A_ndim, B_meta)
@@ -172,7 +160,7 @@ def matmul_vjp_1(ans, g, A, B):
 def metadata(A):
 	return np.shape(A), np.ndim(A), np.iscomplexobj(A)
 
-define_grad(np.matmul, matmul_vjp_0, matmul_vjp_1)
+define_grad(np.matmul, matmul_grad_A, matmul_grad_B)
 
 @call.primitive
 def container_take(A, idx):
