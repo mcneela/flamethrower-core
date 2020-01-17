@@ -63,4 +63,5 @@ def grad_check(f, x, h=1e-4, fn=centered_difference):
     g = y.grad
     approx = fn(f, x, h=h)
     return abs(g - approx) < 1e-3
-    
+
+
