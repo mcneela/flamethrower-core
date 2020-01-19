@@ -72,9 +72,8 @@ def hardtanh(x, minx=-1, maxx=1, minv=-1, maxv=1):
 		return x
 
 def softshrink(x, lval=0.5):
-	if x > lval:
-		return x - lval
-	elif x < -lval:
-		return x + lval
-	else:
-		return tl.zeros(x.shape)
+	z = tl.zeros(x.shape)
+	z[x > lval] = (x - lval)[x > lval]
+	z[x < -lval] = (x + lval)[x < -lval]
+	return z
+	
