@@ -34,7 +34,7 @@ def selu(x, alpha=1.6732632423543772848170429916717):
 	return 1.0507009873554804934193349852946 * elu(x, alpha=alpha)
 
 def celu(x, alpha=1.0):
-	return relu(x) + tl.min(0, alpha * (tl.exp(x / alpha) - 1))
+	return relu(x) + tl.minimum(0, alpha * (tl.exp(x / alpha) - 1))
 
 def softplus(x, beta=1, threshold=20):
 	if x <= threshold:
