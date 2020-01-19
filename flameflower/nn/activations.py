@@ -23,7 +23,7 @@ def leaky_relu(x, alpha=0.1):
 	return relu(x) + alpha * tl.mininimum(0, x)
 
 def relu6(x):
-	return tl.mininimum(tl.maximum(0, x), 6)
+	return tl.minimum(tl.maximum(0, x), 6)
 
 def rrelu(x, lo=0.125, hi=1/3):
 	if x >= 0:
