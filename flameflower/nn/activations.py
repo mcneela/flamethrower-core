@@ -64,16 +64,13 @@ def log_softmax(x):
 	return tl.log(softmax(x))
 
 def hardtanh(x, minx=-1, maxx=1, minv=-1, maxv=1):
-	if x > maxx:
-		return maxv
-	elif x < minx:
-		return minv
-	else:
-		return x
+	z = tl.copy(x)
+	z[z > maxx] = maxv
+	z[z < minx] = minv
+	return z
 
 def softshrink(x, lval=0.5):
 	z = tl.zeros(x.shape)
 	z[x > lval] = (x - lval)[x > lval]
 	z[x < -lval] = (x + lval)[x < -lval]
 	return z
-	
