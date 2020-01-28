@@ -1,5 +1,3 @@
-# import flameflower.autograd.call as call
-# from .include import Primitive
 import flameflower.autograd.call as call
 import numpy as _np
 
@@ -9,7 +7,6 @@ notrace_functions = [
 
 def wrap_namespace(old, new):
     unchanged_types = {float, int, type(None), type}
-    int_types = {_np.int, _np.int8, _np.int16, _np.int32, _np.int64, _np.integer}
     for name, obj in old.items():
         if obj in notrace_functions:
             new[name] = call.Primitive2(obj)
