@@ -1,22 +1,17 @@
 from __future__ import absolute_import
 
-# from flameflower.autograd.variable import Variable
-# from flameflower.autograd.grad_defs import container_take 
-# from .include import Variable, container_take
 import flameflower.autograd.variable as var
 import flameflower.autograd.grad_defs as gd
-import inspect
-import operator
-import numpy as np
 import flameflower.autograd.tensor_library as tl 
 
+import numpy as np
 
 class Tensor(var.Variable):
 	__array_priority__ = 100.0
 
 	__getitem__ = gd.container_take
 
-	def __len__(self): return len(self._value)
+	def __len__(self): return len(self._data)
 
 	def __neg__(self): return tl.negative(self)
 	def __add__(self, other): return tl.add(self, other)
