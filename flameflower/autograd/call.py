@@ -79,8 +79,6 @@ class Primitive2(object):
 			argnums = get_argnums(var_args)
 			ans     = self(*argdata, **kwargs)
 			if name(self.fn) in gd.no_trace_primitives:
-				# print(f"calling nograd!: {self.fn}")
-				# print(f"ans is!: {ans}")
 				node = anode.NoGradNode(ans, self, argdata, kwargs, argnums, parents)
 				return ten.Tensor(ans, node)
 			else:
