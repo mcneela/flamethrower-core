@@ -7,13 +7,12 @@ class Optimizer(object):
 	Abstract base class for neural network optimizers.
 	"""
 	def __init__(self, params, defaults, name=None):
-		self._configure_logging(logfile=f"{name}.log")
 		self.params = params
 		self.defaults = defaults
 		self.name = name
 		if isinstance(params, ag.Tensor):
 			logging.error("Trying to initialize params with non-tensor type.")
-			raise TypeError("Params should be an interable of Tensors.")
+			raise TypeError("Params should be an iterable of Tensors.")
 
 		self.state = {}
 		self.param_groups = []
@@ -38,24 +37,13 @@ class Optimizer(object):
 			param_group (dict): Specifies what Tensors should be optimized along with group
 			specific optimization options.
 		"""
-
 		self.param_groups.append(param_group)
-
-	def _configure_logging(self, logfile=None):
-		if logfile is None:
-			name = self.__name__
-			if name:
-				logfile = f"{name}.log"
-			else:
-				logfile = 'default.log'
-		logging.basicConfig(level=logging.INFO, filename=logfile, filemode='w',
-							format='%(name)s - %(levelname)s - %(message)s')
 
 	def __getstate__(self):
 		return {
 			'defaults': self.defaults,
 			'state': self.state,
-			'param_groups': self.param_groups
+			'params': self.param_groups
 		}
 
 	def __setstate__(self, state):
