@@ -75,7 +75,18 @@ to our library, then visualize our outputs using our own
 plotting tools. We'll get comfortable with every step of the 
 deep learning process from start to finish, and we'll build out 
 complex models in Computer Vision, NLP, and Reinforcement 
-Learning atop this solid, underlying foundation. And when 
-something breaks, we won't be left scratching our heads, because 
-we'll have built the framework we're running and will be 
-intimately familiar with its implementation.
+Learning atop this solid, underlying foundation.
+
+## Installation
+
+To install the library, create a virtual environment using your
+favorite virtual environment manager such as `venv` or `anaconda`. 
+Then run
+```
+python setup.py install
+```
+If you want to modify the library in real-time, in a development 
+environment you can run
+```
+python setup.py develop
+```
