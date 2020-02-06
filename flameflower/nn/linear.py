@@ -22,7 +22,6 @@ class Linear(Module):
 	def _init_params(self, init_fn=None):
 		if not init_fn:
 			init_fn = init.glorot_uniform
-		# logger.info(f"Initializing parameters with initializer {init_fn.name}")
 		self.W = Tensor(init_fn(self.out_size, self.in_size))
 		self.b = Tensor(tl.zeros((1, self.W.shape[0])))
 		self.new_param('W', self.W)
