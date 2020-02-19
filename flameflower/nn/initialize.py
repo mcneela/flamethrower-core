@@ -1,8 +1,6 @@
 """
 This file contains helpful utility functions
 for neural network parameter initialization schemes.
-
-(C) 2019 MLephant, FlameFlower
 """
 from __future__ import division
 
@@ -47,13 +45,13 @@ def normalized(nin, nout):
 
 def glorot_uniform(nin, nout):
 	# nin, nout = get_in_out_dims(tensor)
-	high = 1 / tl.sqrt(nin)
+	high = tl.sqrt(3 / nin)
 	low = -high
 	return tlr.uniform(low, high, size=(nin, nout))
 
 def xavier_normal(nin, nout):
 	# nin, nout = get_in_out_dims(tensor)
-	std = math.sqrt(2.0 / float(nin + nout))
+	std = tl.sqrt(2.0 / float(nin + nout))
 	return tlr.normal(scale=std, size=(nin, nout))
 
 def sparse(tensor, sparsity, std=0.01):

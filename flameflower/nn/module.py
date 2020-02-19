@@ -1,5 +1,7 @@
 from .utils import get_logger
 
+import flameflower.autograd.tensor as ten
+
 from collections import OrderedDict
 import pickle
 
@@ -14,8 +16,7 @@ class Module(object):
 	__slots__ = ['logger', 'is_training', '_buffers', '_params' \
 				 '_children', '_state', '_modules']
 	def __init__(self, name=None):
-		if name:
-			self.__name__ = name
+		self.name = name
 		self.is_training = True
 		# Buffers are persistent state objects
 		# but not module parameters
@@ -26,7 +27,7 @@ class Module(object):
 		self._modules = OrderedDict()
 
 	def __name__(self):
-		return None
+		return self.name
 
 	def new_buffer(self, name, obj):
 		if not isinstance(name, str):
@@ -35,7 +36,7 @@ class Module(object):
 			raise KeyError("Buffer name may not contain \".\"")
 		if name == "":
 			raise KeyError("Buffer name must be nonempty.")
-		if obj is not None and not isinstance(obj, ff.Tensor):
+		if obj is not None and not isinstance(obj, ten.Tensor):
 			raise TypeError("Buffer value must be None or a Tensor, got object of type {}".format(type(obj)))
 		if name in self._buffers:
 			logger.warning(f"Overriding {name} buffer having value {self._buffers[name]} with {obj}")
@@ -109,18 +110,6 @@ class Module(object):
 		logger.info(f"Adding module with name: {name} and value: {module} to internal modules.")
 		self._modules[name] = module
 
-	def add_module(self, name, module):
-		r"""Adds a child module to the current module.
-
-		The module can be accessed as an attribute using the given name.
-
-		Args:
-			name (string): name of the child module. The child module can be
-				accessed from this module using the given name
-			module (Module): child module to be added to the module.
-		"""
-		self._modules[name] = module
-
 	def forward(self, *args, **kwargs):
 		raise NotImplementedError
 
@@ -153,7 +142,7 @@ class Module(object):
 		logger.info(f"Setting training mode to {train_mode}.")
 		self.is_training = train_mode 
 		for child in self.children():
-			child.train(train_mode)
+			child.set_train_mode(train_mode)
 		return self
 
 	def set_infer_mode(self):
@@ -161,4 +150,4 @@ class Module(object):
 		Sets global training mode to inference (train_mode=False)
 		for self and all child modules
 		"""
-		return self.train(train_mode=False)
+		return self.set_train_mode(train_mode=False)
