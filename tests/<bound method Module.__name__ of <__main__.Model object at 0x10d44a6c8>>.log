@@ -1,0 +1,4 @@
+root - INFO - Creating new param with name: W and value: <flameflower.autograd.tensor.Tensor object at 0x10d47ad68>
+root - INFO - Creating new param with name: b and value: <flameflower.autograd.tensor.Tensor object at 0x10d47aef8>
+root - INFO - Creating new param with name: W and value: <flameflower.autograd.tensor.Tensor object at 0x10d47af48>
+root - INFO - Creating new param with name: b and value: <flameflower.autograd.tensor.Tensor object at 0x10d4db0e8>

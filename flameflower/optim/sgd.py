@@ -17,12 +17,11 @@ class SGD(Optimizer):
 			logger.error("Invalid learning rate: {} - should be >= 0.0".format(lr))
 			raise ValueError("Invalid learning rate: {} - should be >= 0.0".format(lr))
 		if use_momentum and beta <= 0:
-			logger.error("Using momentum, but invalid beta value: {} - should be >= 0.0".format(lr))
-			raise ValueError("Using momentum, but invalid momentum value: {} - should be >= 0.0".format(lr))
+			logger.error("Using momentum, but invalid beta value: {} - should be > 0.0".format(beta))
+			raise ValueError("Using momentum, but invalid momentum value: {} - should be > 0.0".format(beta))
 		if beta < 0.0:
-			logger.error("Invalid beta value: {} - should be >= 0.0".format(lr))
-			raise ValueError("Invalid momentum value: {} - should be >= 0.0".format(lr))
-
+			logger.error("Invalid beta value: {} - should be >= 0.0".format(beta))
+			raise ValueError("Invalid momentum value: {} - should be >= 0.0".format(beta))
 		# Set Optimizer defaults and __init__ base with these.
 		defaults = dict(lr=lr, use_momentum=use_momentum,
 						beta=beta, lr_scheduler=lr_scheduler)
@@ -61,7 +60,7 @@ class SGD(Optimizer):
 						v = param_state['v'] = tl.copy(grad)
 					else:
 						v = param_state['v']
-					v = beta * v - lr * grad
+					v = beta * v + lr * grad
 					param_state['v'] = v
 					p.data += v
 				else:

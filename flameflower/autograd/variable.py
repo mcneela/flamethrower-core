@@ -15,7 +15,7 @@ class Variable(object):
 
 	def __init__(self, data, node=None, track=True):
 		self._data = data
-		self._node  = node
+		self._node = node
 		if not node and track:
 			self._node = anode.GradNode.new_root()
 		self._is_tracked = track

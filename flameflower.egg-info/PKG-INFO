@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: flameflower
+Version: 0.1
+Summary: An efficient deep learning library for teaching purposes.
+Home-page: UNKNOWN
+Author: Daniel McNeela
+Author-email: daniel.mcneela@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Keywords: Automatic differentiation,backpropagation,gradients,machine learning,optimization,neural networks,Python,Numpy,Scipy,deep learning
+Platform: UNKNOWN

@@ -10,7 +10,7 @@ class Optimizer(object):
 		self.params = params
 		self.defaults = defaults
 		self.name = name
-		if isinstance(params, ag.Tensor):
+		if not isinstance(params, ag.Tensor):
 			logging.error("Trying to initialize params with non-tensor type.")
 			raise TypeError("Params should be an iterable of Tensors.")
 

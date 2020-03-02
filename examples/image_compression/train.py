@@ -10,6 +10,9 @@ import flameflower.nn as nn
 import flameflower.nn.loss as loss
 import flameflower.optim as optim
 import flameflower.autograd.tensor_library as tl
+import flameflower.nn.utils as utils
+
+utils.configure_logging()
 
 X, y, X_test, y_test = load_mnist()
 
@@ -42,4 +45,5 @@ for epoch in range(NUM_EPOCHS):
 		y = tl.reshape(reconstructed, (1, INPUT_SIZE * BATCH_SIZE))
 		loss_val = loss_fn(y_hat, y)
 		loss_val.backward()
+		print(loss_val.data)
 		optimizer.step()

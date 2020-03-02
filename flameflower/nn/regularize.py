@@ -40,7 +40,7 @@ class L2Regularizer(Module):
 		logger.info(f"Using L2 Regularization")
 		term = 0
 		for w in self.weights:
-			term += 0.5 * tl.sum(tl.square(w))
+			term += tl.sum(tl.square(w))
 		return self.scale * term
 
 class L1Regularizer(Module):

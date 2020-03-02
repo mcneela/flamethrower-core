@@ -1,4 +1,4 @@
-from .tensor import Tensor
+import flameflower.autograd.tensor as ten
 
 def sum_with_none(x, y):
     if x is None:
@@ -51,17 +51,36 @@ def centered_difference(f, x, h=1e-4):
     return (f(x + h) - f(x - h)) / (2 * h)
 
 def substitution_approximation(f, x, u, v):
+    """
+    Calculate the substitution approximation
+    to the function f'(x).
+    """
     g1 = u.T @ f(v * (x + h))
     g2 = u.T @ f(v * (x - h))
     g = (g1 - g2) / h
     return g
 
-def grad_check(f, x, h=1e-4, fn=centered_difference):
-    assert isinstance(x, Tensor)
+def grad_check(f, x, h=1e-4, eps=1e-3, fn=centered_difference):
+    """
+    Wrapper which automates grad checking
+    a function `f` at the point `x` from
+    start to finish.
+    """
+    assert isinstance(x, ten.Tensor)
     y = f(x)
     y.backward()
-    g = y.grad
+    g2 = x.grad
     approx = fn(f, x, h=h)
-    return abs(g - approx) < 1e-3
+    return abs(g2 - approx.data) < eps
+
+
+
+
+
+
+
+
+
+
 
 

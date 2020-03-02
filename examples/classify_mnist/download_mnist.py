@@ -52,7 +52,7 @@ def load_mnist(dest=None):
 
 	if not dest:
 		dest = './data/all'
-	path = dest + '/' + DATA_URL.split('/')[-1]
+	path = dest
 	if not os.path.exists(path):
 		download_from_url(urls, dest=dest)
 

@@ -71,5 +71,3 @@ class TrigonometricScheduler(_LRScheduler):
 		self.lr = self.initial_lr * self.trig_fn(self.scale * self.iter)
 		return self.lr
 
-
-
