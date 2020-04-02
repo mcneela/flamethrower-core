@@ -2,12 +2,12 @@ from __future__ import division
 
 import numpy as np
 
-import flameflower.nn as nn
-import flameflower.nn.loss as loss
-import flameflower.optim as optim
-import flameflower.autograd.tensor_library as tl
+import flamethrower.nn as nn
+import flamethrower.nn.loss as loss
+import flamethrower.optim as optim
+import flamethrower.autograd.tensor_library as tl
 
-from flameflower.autograd import Tensor
+from flamethrower.autograd import Tensor
 import matplotlib.pyplot as plt
 
 from download_mnist import load_mnist

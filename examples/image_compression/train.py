@@ -1,16 +1,16 @@
 from autoencoder import Autoencoder
-from flameflower.autograd import Tensor
+from flamethrower.autograd import Tensor
 from download_mnist import load_mnist
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-import flameflower as ff
-import flameflower.nn as nn
-import flameflower.nn.loss as loss
-import flameflower.optim as optim
-import flameflower.autograd.tensor_library as tl
-import flameflower.nn.utils as utils
+import flamethrower as ff
+import flamethrower.nn as nn
+import flamethrower.nn.loss as loss
+import flamethrower.optim as optim
+import flamethrower.autograd.tensor_library as tl
+import flamethrower.nn.utils as utils
 
 utils.configure_logging()
 

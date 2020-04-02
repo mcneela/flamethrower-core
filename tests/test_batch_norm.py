@@ -1,6 +1,6 @@
-import flameflower.nn.normalize as norm
-import flameflower.nn.activations as act
-import flameflower.nn as nn
+import flamethrower.nn.normalize as norm
+import flamethrower.nn.activations as act
+import flamethrower.nn as nn
 
 class Model(nn.Module):
 	def __init__(self):

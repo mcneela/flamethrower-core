@@ -1,8 +1,8 @@
 import autograd as ag
 import torch
 import autograd.numpy as np
-import flameflower.autograd as ag2
-import flameflower.autograd.tensor_library as tl
+import flamethrower.autograd as ag2
+import flamethrower.autograd.tensor_library as tl
 
 def with_slice(x):
 	y = np.array([1, 2, 3, 2, 1])

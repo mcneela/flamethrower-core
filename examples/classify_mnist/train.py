@@ -3,17 +3,17 @@ from __future__ import division
 import numpy as np
 import sys
 
-import flameflower.nn as nn
-import flameflower.nn.loss as loss
-import flameflower.optim as optim
-import flameflower.autograd.tensor_library as tl
+import flamethrower.nn as nn
+import flamethrower.nn.loss as loss
+import flamethrower.optim as optim
+import flamethrower.autograd.tensor_library as tl
 
-from flameflower.autograd import Tensor
+from flamethrower.autograd import Tensor
 import matplotlib.pyplot as plt
 
 from download_mnist import load_mnist
 from feedforward import FeedforwardNetwork
-import flameflower.nn.utils as utils
+import flamethrower.nn.utils as utils
 
 utils.configure_logging()
 
@@ -50,7 +50,6 @@ for epoch in range(NUM_EPOCHS):
 		eidx = (i + 1) * BATCH_SIZE
 		batch = X[sidx:eidx]
 		preds = model(batch)
-		# sys.exit()
 		y_hat = y[sidx:eidx]
 		loss = loss_fn(y_hat, preds)
 		loss.backward()

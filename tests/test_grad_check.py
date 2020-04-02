@@ -1,8 +1,8 @@
-import flameflower.nn as nn
-import flameflower.autograd as ag
-import flameflower.autograd.utils as utils
+import flamethrower.nn as nn
+import flamethrower.autograd as ag
+import flamethrower.autograd.utils as utils
 
-from flameflower.autograd import Tensor
+from flamethrower.autograd import Tensor
 
 def f(x):
 	return x ** 2

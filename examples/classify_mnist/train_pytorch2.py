@@ -7,12 +7,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import flameflower.nn as nn2
-import flameflower.nn.loss as loss
-import flameflower.optim as optim2
-import flameflower.autograd.tensor_library as tl
+import flamethrower.nn as nn2
+import flamethrower.nn.loss as loss
+import flamethrower.optim as optim2
+import flamethrower.autograd.tensor_library as tl
 
-import flameflower.autograd as ag
+import flamethrower.autograd as ag
 
 from torch import Tensor
 import matplotlib.pyplot as plt
@@ -36,8 +36,6 @@ NUM_ITERS = NUM_EXAMPLES // BATCH_SIZE
 
 X = X.reshape(len(X), DATA_SIZE)
 X = np.divide(X, 255)
-# X = (X - np.mean(X, axis=0, keepdims=True)) / np.std(X, axis=0, keepdims=True)
-# print(X)
 X = X - np.mean(X, axis=0, keepdims=True)
 z = np.std(X, axis=0, keepdims=True)
 z[z == 0] = 1

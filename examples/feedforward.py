@@ -1,10 +1,10 @@
 import numpy as np
 
-import flameflower.nn as nn
-import flameflower.optim as optim
-import flameflower.autograd.tensor_library as tl
+import flamethrower.nn as nn
+import flamethrower.optim as optim
+import flamethrower.autograd.tensor_library as tl
 
-from flameflower.autograd import Tensor
+from flamethrower.autograd import Tensor
 import matplotlib.pyplot as plt
 
 np.random.seed(0)

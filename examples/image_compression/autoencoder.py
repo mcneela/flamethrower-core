@@ -2,10 +2,10 @@ from __future__ import division
 
 import numpy as np
 
-import flameflower.nn as nn
-import flameflower.nn.activations as act
-import flameflower.optim as optim
-import flameflower.autograd.tensor_library as tl
+import flamethrower.nn as nn
+import flamethrower.nn.activations as act
+import flamethrower.optim as optim
+import flamethrower.autograd.tensor_library as tl
 
 
 class Encoder(nn.Module):
