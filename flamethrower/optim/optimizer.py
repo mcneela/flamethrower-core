@@ -66,6 +66,11 @@ class Optimizer(object):
 		for param in group_params:
 			if not isinstance(param, ag.Tensor):
 				raise TypeError("Optimizer parameters must be Tensors, got {}.".format(type(param)))
+		group_param_ids = [id(param) for param in group_params]
+		if len(group_param_ids) != len(set(group_param_ids)):
+			# A duplicate inside one group is just as dangerous as a duplicate
+			# across groups: step() would update the same Tensor more than once.
+			raise ValueError("A Tensor cannot appear more than once in a parameter group.")
 
 		# Each group needs a complete option set. Without merging defaults, RProp
 		# and custom groups fail later when they try to read values such as 'lr'.

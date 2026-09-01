@@ -5,11 +5,13 @@ import flamethrower.autograd.tensor_library as tl
 
 class RProp(Optimizer):
     def __init__(self, params, lr=1e-2, etas=(0.5, 1.2), step_sizes=(1e-6, 50)):
-        if lr < 0:
+        if lr <= 0:
             raise ValueError("Learning rate must be greater than 0.")
         if not 0.0 < etas[0] < 1.0 < etas[1]:
             raise ValueError(f"Invalid etas: {etas[0]}, {etas[1]}. \
                                The first must be in 0 < eta < 1 and the second must be greater than 1.")
+        if not 0.0 < step_sizes[0] <= step_sizes[1]:
+            raise ValueError("Step-size bounds must satisfy 0 < min <= max.")
         defaults = dict(lr=lr, etas=etas, step_sizes=step_sizes)
         super(RProp, self).__init__(params, defaults)
 
@@ -53,8 +55,9 @@ class RProp(Optimizer):
                 # testing `> 0` would immediately re-catch and overwrite it with
                 # eta_plus, making the step size shrink on disagreement impossible.
                 raw_sign = tl.sign(tl.multiply(grad, state['prev']))
+                sign_disagreement = raw_sign < 0
                 sign = tl.ones_like(raw_sign)
-                sign[raw_sign < 0] = eta_minus
+                sign[sign_disagreement] = eta_minus
                 sign[raw_sign > 0] = eta_plus
 
                 # Clip the step sizes at the min/max values
@@ -64,7 +67,9 @@ class RProp(Optimizer):
 
                 # Create a copy of the gradient
                 grad = tl.copy(grad)
-                grad[sign == eta_minus] = 0
+                # Use the original comparison mask rather than testing a remapped
+                # floating-point value for equality with eta_minus.
+                grad[sign_disagreement] = 0
 
                 # The clipped value is the new step size and must be both used
                 # for this update and saved for the next one. Mutating p.data is
