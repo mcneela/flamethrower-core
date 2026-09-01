@@ -17,7 +17,15 @@ nograd_functions = [
 	np.isfinite, np.isinf, np.isnan, np.isneginf, np.isposinf, np.allclose, np.isclose,
 	np.array_equal, np.array_equiv, np.greater, np.greater_equal, np.less, np.less_equal,
 	np.equal, np.not_equal, np.iscomplexobj, np.iscomplex, np.size, np.isscalar,
-	np.isreal, np.zeros_like, np.ones_like, np.result_type]
+	np.isreal, np.zeros_like, np.ones_like, np.result_type,
+	# Constructors: their inputs are shapes/fill values/raw data rather than
+	# something meaningful to backprop through.
+	np.array, np.zeros, np.full,
+	# Binning is piecewise-constant; there's no useful gradient to give it.
+	np.histogram, np.histogram2d,
+	# Sampling has no reparameterization-trick support in this autograd, so
+	# there's nothing to differentiate through.
+	np.random.uniform, np.random.normal, np.random.choice, np.random.permutation]
 
 for fn in nograd_functions:
 	no_trace_primitives[utils.name(fn)] = True
@@ -60,9 +68,13 @@ define_grad(np.maximum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * 
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * max_min_grad(y, ans, x))(g))
 define_grad(np.minimum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * max_min_grad(x, ans, y))(g),
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * max_min_grad(y, ans, x))(g))
+define_grad(np.mod,			lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g)(g),
+							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * np.floor(x / y))(g))
 
 # Single variable gradients
 define_grad(np.negative,	lambda ans, g, x: -g)
+define_grad(np.abs,			lambda ans, g, x: g * np.sign(x))
+define_grad(np.copy,		lambda ans, g, x: g)
 define_grad(np.exp,			lambda ans, g, x: g * ans)
 define_grad(np.exp2, 		lambda ans, g, x: g * ans * np.log(2))
 define_grad(np.expm1,		lambda ans, g, x: g * (ans + 1))
@@ -115,6 +127,12 @@ def grad_np_sum(ans, g, x, axis=None, keepdims=False, dtype=None):
 	shape, dtype = np.shape(x), np.result_type(x)
 	return repeat_to_match_shape(g, shape, dtype, axis, keepdims)[0]
 define_grad(np.sum, grad_np_sum)
+
+def grad_np_mean(ans, g, x, axis=None, keepdims=False, dtype=None):
+	shape, result_dtype = np.shape(x), np.result_type(x)
+	g_repeated, num_reps = repeat_to_match_shape(g, shape, result_dtype, axis, keepdims)
+	return g_repeated / num_reps
+define_grad(np.mean, grad_np_mean)
 
 def unbroadcast(x, target_meta, broadcast_idx=0):
 	target_shape, target_ndim, target_iscomplex = target_meta
@@ -205,6 +223,7 @@ def grad_chooser(ans, g, x, axis=None, keepdims=None):
 	return g_repeated * argmax_locations \
 		/ np.sum(argmax_locations, axis=axis, keepdims=True)
 define_grad(np.max, grad_chooser)
+define_grad(np.min, grad_chooser)
 
 def max_min_grad(x, ans, y):
 	if x == ans:

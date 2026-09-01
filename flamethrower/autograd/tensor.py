@@ -38,6 +38,26 @@ class Tensor(var.Variable):
 	def __le__(self, other): return tl.less_equal(self, other)
 	def __abs__(self): return tl.abs(self)
 	def __hash__(self): return id(self)
+	def __and__(self, other): return tl.logical_and(self, other)
+	def __rand__(self, other): return tl.logical_and(other, self)
+	def __or__(self, other): return tl.logical_or(self, other)
+	def __ror__(self, other): return tl.logical_or(other, self)
+
+	def __setitem__(self, idx, value):
+		"""
+		Mutates the underlying data in place, e.g. for boolean-mask assignment
+		like ``z[x > 0] = 0``. Like the in-place parameter updates in optim/,
+		this does not extend the computation graph: the node this Tensor was
+		built from is left untouched, so it does not know the values changed.
+		Forward reads of ``.data`` after this call see the new values, but
+		gradients computed by walking back through this Tensor's node will
+		still be computed as though the assignment never happened.
+		"""
+		if isinstance(idx, var.Variable):
+			idx = idx.data
+		if isinstance(value, var.Variable):
+			value = value.data
+		self._data[idx] = value
 
 
 tensor_types = [float, np.float16, np.float32, np.float64,
