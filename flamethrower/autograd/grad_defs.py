@@ -70,6 +70,12 @@ define_grad(np.minimum,		lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g * 
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g:   g * max_min_grad(y, ans, x))(g))
 define_grad(np.mod,			lambda ans, g, x, y : unbroadcast_f(x, lambda g:   g)(g),
 							lambda ans, g, x, y : unbroadcast_f(y, lambda g: - g * np.floor(x / y))(g))
+# The condition array of np.where(cond, x, y) is boolean and has no useful
+# gradient; the two value branches just pass the incoming gradient through
+# wherever they were the one selected, and zero it out where they weren't.
+define_grad(np.where,		lambda ans, g, cond, x, y : np.zeros_like(g),
+							lambda ans, g, cond, x, y : np.where(cond, g, np.zeros_like(g)),
+							lambda ans, g, cond, x, y : np.where(cond, np.zeros_like(g), g))
 
 # Single variable gradients
 define_grad(np.negative,	lambda ans, g, x: -g)
@@ -226,6 +232,9 @@ define_grad(np.max, grad_chooser)
 define_grad(np.min, grad_chooser)
 
 def max_min_grad(x, ans, y):
-	if x == ans:
-		return 1
-	return 0
+	# Same class of bug as the scalar-only `if`s fixed elsewhere: `x == ans`
+	# is an array for any non-scalar input, and Python can't branch on that.
+	# At a tie (x == y == ans) both operands get gradient 1, same as the
+	# scalar version did - this only vectorizes it, it doesn't change the
+	# tie-breaking behavior.
+	return np.where(x == ans, 1, 0)

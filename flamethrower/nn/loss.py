@@ -76,22 +76,39 @@ def kl_divergence(p, q, regularizer=None):
 	return -tl.sum(p * tl.log(q / p)) + regularizer()
 
 def huber(y, y_hat, delta=1, regularizer=None):
+	"""
+	Huber loss: quadratic for small residuals, linear beyond `delta`.
+	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	if tl.abs(y_hat - y) < delta:
-		return .5 * (y_hat - y) ** 2 + regularizer()
-	else:
-		return delta * tl.abs(y_hat - y) - (delta / 2) + regularizer()
+	residual = y_hat - y
+	# `tl.abs(residual) < delta` is a Tensor, and Python's `if` can only
+	# branch on a single value - it raised for any batch with more than one
+	# element. tl.where makes the choice per element instead; the condition
+	# itself is kept a raw array (residual.data) rather than a traced Tensor
+	# comparison, same as in activations.py.
+	quadratic = 0.5 * residual ** 2
+	linear = delta * tl.abs(residual) - (delta / 2)
+	return tl.where(abs(residual.data) < delta, quadratic, linear) + regularizer()
 
 def huber_binary_loss(y, y_hat, delta=1, regularizer=None):
-	if y_hat == 0:
-		y_hat = -1
-	if y == 0:
-		y = -1
+	"""
+	Modified Huber loss for binary classification with labels in {-1, +1}
+	(0 is treated as the negative class and remapped to -1).
+	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	if y_hat * y >= -1:
-		return tl.max(0, 1 - y_hat * y) ** 2
-	else:
-		return -4 * y_hat * y
+	# As with huber() above, these were plain `if`s comparing Tensors, which
+	# only worked for a single-element input; tl.where vectorizes them.
+	y_hat = tl.where(y_hat.data == 0, -1, y_hat)
+	y = tl.where(y.data == 0, -1, y)
+	margin = y_hat * y
+	# tl.max reduces an array to its largest element (numpy's second
+	# positional arg to max() is `axis`, not a value to compare against);
+	# the elementwise max against 0 needs tl.maximum instead.
+	quadratic = tl.maximum(0, 1 - margin) ** 2
+	linear = -4 * margin
+	# regularizer() was computed above but never actually added to either
+	# branch in the original code, unlike every other loss in this file.
+	return tl.where(margin.data >= -1, quadratic, linear) + regularizer()
 

@@ -26,9 +26,13 @@ def relu6(x):
 	return tl.minimum(tl.maximum(0, x), 6)
 
 def rrelu(x, lo=0.125, hi=1/3):
-	if x >= 0:
-		return x
-	return tl.random.uniform(lo, hi) * x
+	# A plain `if x >= 0` only works for a single-element x: comparing an
+	# array yields an array, and Python can't branch on that. tl.where
+	# applies the per-element choice instead. The condition must stay a raw
+	# array (x.data), not a traced Tensor comparison, or its no-grad node
+	# would end up as a parent of this differentiable node during backward().
+	noise = tl.random.uniform(lo, hi, size=x.shape)
+	return tl.where(x.data >= 0, x, noise * x)
 
 def selu(x, alpha=1.6732632423543772848170429916717):
 	return 1.0507009873554804934193349852946 * elu(x, alpha=alpha)
@@ -37,9 +41,17 @@ def celu(x, alpha=1.0):
 	return relu(x) + tl.minimum(0, alpha * (tl.exp(x / alpha) - 1))
 
 def softplus(x, beta=1, threshold=20):
-	if x <= threshold:
-		return (1 / beta) * tl.log(1 + tl.exp(beta * x))
-	return x
+	stable = beta * x.data <= threshold
+	# tl.where evaluates both branches for every element (there's no lazy
+	# short-circuiting like Python's `if`), so beta*x must be kept small
+	# before it ever reaches exp() - otherwise the overflowed exp(beta*x)
+	# in the discarded elements can turn into a NaN gradient once the
+	# zeroed-out incoming gradient from tl.where multiplies through it
+	# (0 * inf = NaN). Substituting 0 there keeps that branch finite;
+	# tl.where still picks `x` itself for those elements in the output.
+	safe_x = tl.where(stable, x, tl.zeros(x.shape))
+	approx = (1 / beta) * tl.log(1 + tl.exp(beta * safe_x))
+	return tl.where(stable, approx, x)
 
 def softsign(x):
 	return x / (1 + tl.abs(x))
@@ -51,9 +63,11 @@ def tanhshrink(x):
 	return x - tl.tanh(x)
 
 def threshold(x, val):
-	if x > threshold:
-		return x
-	return val
+	# The original compared x to the `threshold` function object itself
+	# (a leftover reference to this function's own name, not `val`), and
+	# used a plain Python `if` that would also break on any array with more
+	# than one element.
+	return tl.where(x.data > val, x, val)
 
 def softmin(x, axis=1):
 	x = -x - tl.max(x, axis=axis, keepdims=True)
