@@ -9,22 +9,40 @@ logger = get_logger()
 class Dropout(Module):
 	def __init__(self, p=0.5, on=True):
 		super(Dropout, self).__init__()
+		if not 0 <= p <= 1:
+			raise ValueError("Dropout probability must be between zero and one.")
 		self.p = p
-		self.on = on
+		# Preserve the old `on` constructor argument, but store mode in the same
+		# is_training flag used by every other stateful Module.
+		self.is_training = bool(on)
+
+	@property
+	def on(self):
+		"""Compatibility alias for the module's training state."""
+		return self.is_training
+
+	@on.setter
+	def on(self, value):
+		self.is_training = bool(value)
 
 	def test_mode(self):
-		self.on = False
+		return self.eval()
 
 	def train_mode(self):
-		self.on = True
+		return self.train()
 
 	def forward(self, X):
 		logger.info(f"Using dropout on data: {X} with probability: {self.p}")
-		if not self.on:
+		if not self.is_training or self.p == 0:
 			return X
-		mask = tl.random.uniform(0, 1, size=X.shape)
-		mask = mask < self.p
-		return X * mask
+		if self.p == 1:
+			return X * 0
+
+		# p is the probability of dropping a unit. Dividing retained units by
+		# their keep probability preserves the expected activation at inference.
+		keep_probability = 1 - self.p
+		mask = tl.random.uniform(0, 1, size=X.shape) >= self.p
+		return X * mask / keep_probability
 
 class L2Regularizer(Module):
 	def __init__(self, weights, scale=1):
