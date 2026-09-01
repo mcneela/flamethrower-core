@@ -26,11 +26,14 @@ class RProp(Optimizer):
 
         for group in self.param_groups:
             for p in group['params']:
-                if not p.grad:
+                # Array truth testing is ambiguous and raises for multi-element
+                # gradients. None is the only value that means "no gradient".
+                grad = getattr(p.node, '_grad', None)
+                if grad is None:
                     continue
-                # Get the current param gradient
-                grad = p.grad
-                state = self.state[p]
+                # Create state lazily so the first gradient for a parameter does
+                # not fail with a KeyError.
+                state = self.state.setdefault(p, {})
 
                 if len(state) == 0:
                     # Initialize state
@@ -45,10 +48,14 @@ class RProp(Optimizer):
                 # Increment the current step
                 state['step'] += 1
 
-                sign = tl.sign(tl.multiply(grad, state['prev']))
-                sign[sign < 0] = eta_minus
-                sign[sign > 0] = eta_plus
-                sign[sign == 0] = 1
+                # Masks must be computed against the raw sign before any mutation.
+                # eta_minus is itself positive, so writing it in place and then
+                # testing `> 0` would immediately re-catch and overwrite it with
+                # eta_plus, making the step size shrink on disagreement impossible.
+                raw_sign = tl.sign(tl.multiply(grad, state['prev']))
+                sign = tl.ones_like(raw_sign)
+                sign[raw_sign < 0] = eta_minus
+                sign[raw_sign > 0] = eta_plus
 
                 # Clip the step sizes at the min/max values
                 clipped = tl.multiply(sign, step_size)
@@ -59,7 +66,11 @@ class RProp(Optimizer):
                 grad = tl.copy(grad)
                 grad[sign == eta_minus] = 0
 
-                p -= step_size * tl.sign(grad)
+                # The clipped value is the new step size and must be both used
+                # for this update and saved for the next one. Mutating p.data is
+                # essential: `p -= ...` would only rebind this local variable.
+                state['step_size'] = clipped
+                p.data -= clipped * tl.sign(grad)
 
                 state['prev'] = grad
 
