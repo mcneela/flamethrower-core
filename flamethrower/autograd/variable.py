@@ -70,10 +70,10 @@ class Variable(object):
 			fn, value, args, kwargs, argnums = node.package
 			for argnum, parent in zip(argnums, node.parents):
 				grad_fn = node.grad_fns[argnum]
-				try:
-					parent_grad = grad_fn(value, g, *args, **kwargs)
-				except:
-					print(utils.name(node.package[0]))
+				# Gradient errors must propagate immediately. Suppressing them here
+				# allowed a stale parent_grad from an earlier operation to be reused,
+				# silently producing incorrect gradients during training.
+				parent_grad = grad_fn(value, g, *args, **kwargs)
 				outgrads[parent] = utils.sum_with_none(outgrads.get(parent), parent_grad)
 				parent._grad = outgrads[parent]
 		return g 
