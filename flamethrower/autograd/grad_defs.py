@@ -80,7 +80,7 @@ define_grad(np.where,		lambda ans, g, cond, x, y : np.zeros_like(g),
 # Single variable gradients
 define_grad(np.negative,	lambda ans, g, x: -g)
 define_grad(np.abs,			lambda ans, g, x: g * np.sign(x))
-define_grad(np.copy,		lambda ans, g, x: g)
+define_grad(np.copy,		lambda ans, g, x, order='K', subok=False: g)
 define_grad(np.exp,			lambda ans, g, x: g * ans)
 define_grad(np.exp2, 		lambda ans, g, x: g * ans * np.log(2))
 define_grad(np.expm1,		lambda ans, g, x: g * (ans + 1))
@@ -93,13 +93,13 @@ define_grad(np.cos, 		lambda ans, g, x: g * -np.sin(x))
 define_grad(np.tan, 		lambda ans, g, x: g / (np.cos(x) ** 2))
 define_grad(np.arcsin, 		lambda ans, g, x: g / np.sqrt(1 - x ** 2))
 define_grad(np.arccos, 		lambda ans, g, x: -g / np.sqrt(1 - x ** 2))
-define_grad(np.arctan, 		lambda ans, g, x: g / np.sqrt(1 + x ** 2))
+define_grad(np.arctan, 		lambda ans, g, x: g / (1 + x ** 2))
 define_grad(np.sinh, 		lambda ans, g, x: g * np.cosh(x))
 define_grad(np.cosh,		lambda ans, g, x: g * np.sinh(x))
 define_grad(np.tanh,		lambda ans, g, x: g / (np.cosh(x) ** 2))
 define_grad(np.arcsinh, 	lambda ans, g, x: g / np.sqrt(x ** 2 + 1))
 define_grad(np.arccosh, 	lambda ans, g, x: g / np.sqrt(x ** 2 - 1))
-define_grad(np.arctanh, 	lambda ans, g, x: g / np.sqrt(1 - x ** 2))
+define_grad(np.arctanh, 	lambda ans, g, x: g / (1 - x ** 2))
 define_grad(np.rad2deg, 	lambda ans, g, x: g * 180 / np.pi)
 define_grad(np.degrees, 	lambda ans, g, x: g * 180 / np.pi)
 define_grad(np.deg2rad, 	lambda ans, g, x: g * np.pi / 180)
@@ -129,15 +129,24 @@ def repeat_to_match_shape(g, shape, dtype, axis, keepdims):
 	# return np.broadcast_to(np.reshape(g, new_shape), shape), num_reps
 	return np.reshape(g, new_shape) + np.zeros(shape, dtype=dtype), num_reps
 
-def grad_np_sum(ans, g, x, axis=None, keepdims=False, dtype=None):
+def grad_np_sum(ans, g, x, axis=None, dtype=None, out=None, keepdims=False,
+				initial=None, where=True):
 	shape, dtype = np.shape(x), np.result_type(x)
-	return repeat_to_match_shape(g, shape, dtype, axis, keepdims)[0]
+	g_repeated = repeat_to_match_shape(g, shape, dtype, axis, keepdims)[0]
+	# A masked-out input does not contribute to the sum and therefore receives
+	# zero gradient. Broadcasting mirrors NumPy's handling of a scalar mask.
+	return g_repeated * np.broadcast_to(where, shape)
 define_grad(np.sum, grad_np_sum)
 
-def grad_np_mean(ans, g, x, axis=None, keepdims=False, dtype=None):
+def grad_np_mean(ans, g, x, axis=None, dtype=None, out=None, keepdims=False,
+				where=True):
 	shape, result_dtype = np.shape(x), np.result_type(x)
-	g_repeated, num_reps = repeat_to_match_shape(g, shape, result_dtype, axis, keepdims)
-	return g_repeated / num_reps
+	g_repeated = repeat_to_match_shape(g, shape, result_dtype, axis, keepdims)[0]
+	mask = np.broadcast_to(where, shape)
+	# keepdims=True makes the divisor broadcastable for scalar, single-axis,
+	# and multi-axis reductions without special-casing their shapes.
+	num_reps = np.sum(mask, axis=axis, keepdims=True)
+	return g_repeated * mask / num_reps
 define_grad(np.mean, grad_np_mean)
 
 def unbroadcast(x, target_meta, broadcast_idx=0):
@@ -232,9 +241,9 @@ define_grad(np.max, grad_chooser)
 define_grad(np.min, grad_chooser)
 
 def max_min_grad(x, ans, y):
-	# Same class of bug as the scalar-only `if`s fixed elsewhere: `x == ans`
-	# is an array for any non-scalar input, and Python can't branch on that.
-	# At a tie (x == y == ans) both operands get gradient 1, same as the
-	# scalar version did - this only vectorizes it, it doesn't change the
-	# tie-breaking behavior.
-	return np.where(x == ans, 1, 0)
+	# The selected operand receives the gradient elementwise. At a tie, split
+	# it evenly so maximum(x, y) and minimum(x, y) preserve a total derivative
+	# of one rather than incorrectly sending a full gradient to both operands.
+	selected = x == ans
+	tied = x == y
+	return selected / (1.0 + tied)
