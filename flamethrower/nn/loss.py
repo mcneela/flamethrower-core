@@ -43,23 +43,27 @@ def mean_squared_error(y, y_hat, regularizer=None):
 	l = (1 / n) * tl.sum((y_hat - y) ** 2)
 	return l + regularizer()
 
-def l2(y, y_hat, regularizer=None):
+def l2(y, y_hat, regularizer=None, eps=1e-12):
 	"""
-	Loss function using the L2 norm.
-	Equivalent to minimization with
-	MSE loss.
+	Loss function using the L2 (Euclidean) norm of the residual vector.
+	Equivalent to minimization with MSE loss, since sqrt is monotonic on
+	nonnegative inputs and MSE minimizes the same squared norm.
+
+	`eps` keeps the gradient finite when the residual norm is exactly zero -
+	d/dx sqrt(x) is undefined at x=0, which sum-of-squares reaches whenever
+	every prediction in the batch exactly matches its target.
 	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	return tl.sum(tl.sqrt((y_hat - y) ** 2)) + regularizer()
+	return tl.sqrt(tl.sum((y_hat - y) ** 2) + eps) + regularizer()
 
 def l1(y, y_hat, regularizer=None):
 	"""
-	Loss function using the L1 norm.
+	Loss function using the L1 (Manhattan) norm of the residual vector.
 	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	return tl.abs(y_hat - y) + regularizer()
+	return tl.sum(tl.abs(y_hat - y)) + regularizer()
 
 def kl_divergence(p, q, regularizer=None):
 	"""

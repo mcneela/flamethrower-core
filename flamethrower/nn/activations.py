@@ -12,7 +12,7 @@ def relu(x):
 	return tl.maximum(0, x)
 
 def elu(x, alpha=1.0):
-	return relu(x) + tl.mininimum(0, alpha * (tl.exp(x) - 1))
+	return relu(x) + tl.minimum(0, alpha * (tl.exp(x) - 1))
 
 def hardshrink(x, lval=0.5):
 	z = tl.copy(x)
@@ -20,7 +20,7 @@ def hardshrink(x, lval=0.5):
 	return z
 
 def leaky_relu(x, alpha=0.1):
-	return relu(x) + alpha * tl.mininimum(0, x)
+	return relu(x) + alpha * tl.minimum(0, x)
 
 def relu6(x):
 	return tl.minimum(tl.maximum(0, x), 6)

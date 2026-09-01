@@ -13,7 +13,7 @@ class Module(object):
 	objects.
 	"""
 	# Using __slots__ makes things faster
-	__slots__ = ['logger', 'is_training', '_buffers', '_params' \
+	__slots__ = ['name', 'logger', 'is_training', '_buffers', '_params', \
 				 '_children', '_state', '_modules']
 	def __init__(self, name=None):
 		self.name = name
