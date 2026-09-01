@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from flamethrower.autograd import Tensor
 from flamethrower.nn import Linear
@@ -90,3 +91,25 @@ def test_parameter_group_can_override_default_learning_rate():
 	optimizer.step()
 
 	np.testing.assert_allclose(param.data, [0.75])
+
+
+def test_optimizer_rejects_a_duplicate_parameter_within_one_group():
+	param = Tensor(np.array([1.0]))
+
+	with pytest.raises(ValueError, match="more than once"):
+		SGD([param, param], lr=0.1)
+
+
+@pytest.mark.parametrize(
+	"kwargs",
+	[
+		{'lr': 0},
+		{'step_sizes': (0, 1)},
+		{'step_sizes': (2, 1)},
+	],
+)
+def test_rprop_rejects_invalid_step_configuration(kwargs):
+	param = Tensor(np.array([1.0]))
+
+	with pytest.raises(ValueError):
+		RProp([param], **kwargs)
