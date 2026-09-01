@@ -129,25 +129,40 @@ class Module(object):
 
 	def children(self):
 		"""
-		Returns an iterator over named child modules
+		Returns an iterator over immediate child modules.
 		"""
-		for name, child in self._children:
-			yield child
+		# add_module() stores children in _modules. Iterating the unused
+		# _children dictionary meant mode changes never reached actual layers.
+		for child in self._modules.values():
+			if child is not None:
+				yield child
+
+	def train(self, mode=True):
+		"""Set training mode recursively for this module and its children."""
+		if not isinstance(mode, bool):
+			raise TypeError("Training mode must be a boolean.")
+		logger.info(f"Setting training mode to {mode}.")
+		self.is_training = mode
+		for child in self.children():
+			child.train(mode)
+		return self
+
+	def eval(self):
+		"""Set inference mode recursively for this module and its children."""
+		return self.train(False)
 
 	def set_train_mode(self, train_mode=True):
 		"""
 		Sets global training mode to train_mode=True
 		for self and all child modules
 		"""
-		logger.info(f"Setting training mode to {train_mode}.")
-		self.is_training = train_mode 
-		for child in self.children():
-			child.set_train_mode(train_mode)
-		return self
+		# Keep the original educational API as a compatibility alias while all
+		# state changes flow through one implementation.
+		return self.train(train_mode)
 
 	def set_infer_mode(self):
 		"""
 		Sets global training mode to inference (train_mode=False)
 		for self and all child modules
 		"""
-		return self.set_train_mode(train_mode=False)
+		return self.eval()
