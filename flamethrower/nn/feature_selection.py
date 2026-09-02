@@ -11,7 +11,7 @@ def calc_mi(X, Y, bins):
 	return h_X + h_Y - h_XY
 
 def entropy(counts):
-	total = np.sum(counts)
+	total = tl.sum(counts)
 	dist  = counts / total
 	dist[dist == 0] = 1
 	h = -tl.sum(dist * tl.log(dist))
