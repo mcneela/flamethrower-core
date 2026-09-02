@@ -210,7 +210,10 @@ define_grad(np.matmul, matmul_grad_A, matmul_grad_B)
 def container_take(A, idx):
 	return A[idx]
 def grad_container_take(ans, g, A, idx):
-	x = np.zeros_like(A.data)
+	# Primitive arguments are already unboxed to ndarrays. A.data is therefore
+	# a memoryview, not the Tensor payload, and can lose shape/dtype information
+	# for advanced indexing used by vectorized cross entropy.
+	x = np.zeros_like(A)
 	np.add.at(x, idx, g)
 	return x
 
