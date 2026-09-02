@@ -29,7 +29,7 @@ class LinearScheduler(_LRScheduler):
 	def step(self):
 		self.iter += 1
 		self.lr = self.initial_lr / (self.scale * self.iter)
-		if self.batch_size and (self.iter % self.iters_per_epoch == 0):
+		if self.iters_per_epoch and (self.iter % self.iters_per_epoch == 0):
 			self.epoch += 1
 		return self.lr
 
