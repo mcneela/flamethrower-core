@@ -4,6 +4,7 @@ functions used in training
 deep neural networks.
 """
 from __future__ import division
+import numpy as np
 import flamethrower.autograd.tensor_library as tl
 
 def cross_entropy(y, y_hat, regularizer=None):
@@ -30,7 +31,15 @@ def binary_cross_entropy(y, y_hat, eps=1e-5, regularizer=None):
 	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	return tl.mean(-y * tl.log(y_hat + eps) - (1 - y) * tl.log(1 - y_hat + eps)) + regularizer()
+	# Clipping the prediction directly into [eps, 1-eps] keeps log()'s
+	# argument in a safe range without disturbing it anywhere else. Adding
+	# eps inside every log call instead let a prediction of exactly 1.0 push
+	# log(y_hat+eps) slightly above log(1), producing a small NEGATIVE loss
+	# for a perfect prediction - impossible for a true loss - and it added
+	# the same eps-sized error to every gradient, not just ones near the
+	# boundary that actually need clipping.
+	clipped = tl.where(y_hat.data < eps, eps, tl.where(y_hat.data > 1 - eps, 1 - eps, y_hat))
+	return tl.mean(-y * tl.log(clipped) - (1 - y) * tl.log(1 - clipped)) + regularizer()
 
 def mean_squared_error(y, y_hat, regularizer=None):
 	"""
@@ -67,13 +76,22 @@ def l1(y, y_hat, regularizer=None):
 
 def kl_divergence(p, q, regularizer=None):
 	"""
-	Returns a notion of "distance"
-	between two probability distributions
-	p and q.
+	Returns a notion of "distance" between two probability distributions
+	p and q. `p` is treated as a fixed reference distribution (a plain
+	array, like the labels in the loss functions above); only `q` needs to
+	be a Tensor to backpropagate through.
 	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	return -tl.sum(p * tl.log(q / p)) + regularizer()
+	p = np.asarray(p)
+	# p*log(q/p) = p*log(q) - p*log(p). Dividing by p directly, as q/p did,
+	# produced inf*0 = NaN at any p entry that was exactly zero - even
+	# though a zero-probability entry's true contribution to KL divergence
+	# is defined to be zero (the same 0*log(0) = 0 convention used for
+	# entropy). Splitting the ratio this way avoids ever dividing by p.
+	safe_p = np.where(p == 0, 1, p)
+	p_log_p = np.sum(np.where(p == 0, 0, p * np.log(safe_p)))
+	return p_log_p - tl.sum(p * tl.log(q)) + regularizer()
 
 def huber(y, y_hat, delta=1, regularizer=None):
 	"""
@@ -88,7 +106,11 @@ def huber(y, y_hat, delta=1, regularizer=None):
 	# itself is kept a raw array (residual.data) rather than a traced Tensor
 	# comparison, same as in activations.py.
 	quadratic = 0.5 * residual ** 2
-	linear = delta * tl.abs(residual) - (delta / 2)
+	# The standard Huber formula is delta*(|r| - 0.5*delta), i.e. delta*|r| -
+	# 0.5*delta**2. Subtracting delta/2 instead only happens to be correct at
+	# the default delta=1 (where 0.5*delta**2 == delta/2); any other delta
+	# gave the wrong constant.
+	linear = delta * tl.abs(residual) - 0.5 * delta ** 2
 	return tl.where(abs(residual.data) < delta, quadratic, linear) + regularizer()
 
 def huber_binary_loss(y, y_hat, delta=1, regularizer=None):
@@ -98,10 +120,11 @@ def huber_binary_loss(y, y_hat, delta=1, regularizer=None):
 	"""
 	if regularizer is None:
 		regularizer = lambda: 0
-	# As with huber() above, these were plain `if`s comparing Tensors, which
-	# only worked for a single-element input; tl.where vectorizes them.
-	y_hat = tl.where(y_hat.data == 0, -1, y_hat)
-	y = tl.where(y.data == 0, -1, y)
+	# Only y (the label) is remapped from {0, 1} to {-1, +1}. y_hat is a
+	# continuous prediction score, and 0.0 is a meaningful value there in
+	# its own right - e.g. right after initialization - not a stand-in for
+	# a negative label, so it must not be remapped the same way.
+	y = np.where(np.asarray(y) == 0, -1, y)
 	margin = y_hat * y
 	# tl.max reduces an array to its largest element (numpy's second
 	# positional arg to max() is `axis`, not a value to compare against);
