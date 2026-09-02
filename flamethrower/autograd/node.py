@@ -35,16 +35,20 @@ class GradNode(Node):
 		self.parents = parents
 		self.package = fn, val, args, kwargs, argnums
 		self.name = node_name
+		# Set even before backward() ever runs, so `.grad` reliably returns
+		# None for a Tensor that hasn't received a gradient yet instead of
+		# raising AttributeError on the unset __slots__ attribute.
+		self._grad = None
 		try:
 			self.grad_fns = gd.grad_definitions[utils.name(fn)]
 		except KeyError:
-			fn_name = utils.name(fn) 
+			fn_name = utils.name(fn)
 			raise NotImplementedError("Grad of {} wrt argnums {} not defined".format(fn_name, argnums))
 
 	@property
 	def grad(self):
 		return self._grad
-	
+
 	def __str__(self):
 		if self.name:
 			return self.name
@@ -55,6 +59,7 @@ class GradNode(Node):
 		self.parents = []
 		self.package = (lambda x: x, None, (), {}, [])
 		self.grad_fns = {0: lambda g, ans, x, y: (), 1: lambda g, ans, x, y: ()}
+		self._grad = None
 
 class NoGradNode(Node):
 	"""
