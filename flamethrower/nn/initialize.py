@@ -33,19 +33,14 @@ def get_in_out_dims(tensor):
 
 	return nin, nout
 
-def normalized(nin, nout):
-	"""
-	See Glorot and Bengio (2010)
-	Pg. 253, Eq. (16)
-	"""
-	# nin, nout = get_in_out_dims(tensor)
-	high = tl.sqrt(6 / float(nin + nout))
-	low = -high
-	return tlr.uniform(low, high, size=(nin, nout))
-
 def glorot_uniform(nin, nout):
-	# nin, nout = get_in_out_dims(tensor)
-	high = tl.sqrt(3 / nin)
+	"""
+	See Glorot and Bengio (2010), pg. 253, Eq. (16). Was previously using
+	sqrt(3/nin) - a fan-in-only bound, not the fan-in-and-fan-out one this
+	function is named and documented for - so every Linear layer using the
+	default initializer was scaled differently than intended.
+	"""
+	high = tl.sqrt(6 / float(nin + nout))
 	low = -high
 	return tlr.uniform(low, high, size=(nin, nout))
 
@@ -66,7 +61,7 @@ def sparse(tensor, sparsity, std=0.01):
 	rows, cols = tensor.shape
 	num_zeros = int(math.ceil(sparsity * rows))
 
-	X = tlr.normal(loc=0, scale=std)
+	X = tlr.normal(loc=0, scale=std, size=(rows, cols))
 	for col_idx in range(cols):
 		row_idxs = tlr.permutation(rows)
 		zero_idxs = row_idxs[:num_zeros]
