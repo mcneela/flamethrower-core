@@ -55,13 +55,16 @@ def test_hardtanh_clips_values_without_in_place_tensor_assignment():
     np.testing.assert_allclose(x.grad, [0.0, 1.0, 1.0, 1.0, 0.0])
 
 
-def test_threshold_has_separate_cutoff_and_replacement_values():
+def test_threshold_keeps_x_above_val_and_replaces_it_with_val_otherwise():
+    # threshold(x, val) uses val as both the cutoff and the replacement -
+    # there's only one parameter, unlike PyTorch's separate
+    # threshold/value pair.
     x = Tensor(np.array([-2.0, 0.0, 3.0]))
 
-    output = activations.threshold(x, threshold_value=1.0, value=-0.5)
+    output = activations.threshold(x, 1.0)
     tl.sum(output).backward()
 
-    np.testing.assert_allclose(output.data, [-0.5, -0.5, 3.0])
+    np.testing.assert_allclose(output.data, [1.0, 1.0, 3.0])
     np.testing.assert_allclose(x.grad, [0.0, 0.0, 1.0])
 
 
