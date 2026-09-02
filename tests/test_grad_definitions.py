@@ -83,7 +83,7 @@ def test_binary_cross_entropy_can_backpropagate_through_mean():
     binary_cross_entropy(targets, predictions, eps=eps).backward()
 
     expected = np.array([
-        1 / (1 - predictions.data[0] + eps),
-        -1 / (predictions.data[1] + eps),
+        1 / (1 - predictions.data[0]),
+        -1 / predictions.data[1],
     ]) / len(targets)
     np.testing.assert_allclose(predictions.grad, expected)
